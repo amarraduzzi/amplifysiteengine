@@ -29,6 +29,7 @@ export const Header: React.FC<HeaderProps> = ({ language, setLanguage }) => {
   const { count, totalMAD, openDrawer, bumpTrigger } = useCart();
   const [scrolled, setScrolled] = useState(false);
   const [langMenuOpen, setLangMenuOpen] = useState(false);
+  const [logoFailed, setLogoFailed] = useState(false);
   const langRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -71,7 +72,27 @@ export const Header: React.FC<HeaderProps> = ({ language, setLanguage }) => {
           className="flex items-center gap-2 min-w-0 shrink"
           onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
         >
-          <img src={identity.logoSrc} alt={identity.name} className="h-8 sm:h-9 w-auto object-contain shrink-0" />
+          {/* A missing/broken logoSrc must NEVER show the browser's default
+              broken-image icon + alt text — that eats width and pushed the
+              restaurant name into a truncated "Indian Sp..." Fall back to a
+              simple initial badge in the brand colors instead. This matters
+              in practice: a client's real logo often isn't uploaded yet
+              during the first build pass. */}
+          {!logoFailed ? (
+            <img
+              src={identity.logoSrc}
+              alt={identity.name}
+              onError={() => setLogoFailed(true)}
+              className="h-8 sm:h-9 w-8 sm:w-9 object-contain shrink-0"
+            />
+          ) : (
+            <span
+              className="h-8 sm:h-9 w-8 sm:w-9 rounded-full flex items-center justify-center font-display font-bold text-sm shrink-0"
+              style={{ backgroundColor: colors.primary, color: colors.background }}
+            >
+              {identity.name.charAt(0).toUpperCase()}
+            </span>
+          )}
           <span
             className="font-display font-semibold text-base sm:text-lg truncate"
             style={{ color: colors.textPrimary }}
