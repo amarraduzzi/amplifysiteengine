@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion, useScroll, useTransform } from 'motion/react';
 import { brandConfig } from '../../config/brand.config';
+import { grainSvgDataUri } from '../../config/theme';
 import { MagneticButton } from '../ui/MagneticButton';
 import type { Language } from '../../types';
 
@@ -18,21 +19,20 @@ const wordVariants = {
   visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: [0.16, 1, 0.3, 1] as const } },
 };
 
-// Grain texture as an inline SVG data-uri (feTurbulence) — no image asset
-// needed, works for every client. Applied at low opacity with
-// mix-blend-mode overlay so it adds cinematic texture without darkening.
-const GRAIN_SVG =
-  "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>";
-
 // Wow module (Layer 3): "parallaxHero", now a genuinely distinct layout
 // rather than a polished version of the most generic hero pattern that
-// exists (centered text over a photo). Five deliberate departures:
+// exists (centered text over a photo). Deliberate departures:
 //   1. Asymmetric split on larger screens — a solid text panel + a photo
 //      panel bleeding to the edge, instead of everything centered.
-//   2. An opening reveal: the photo wipes into view once on mount instead
-//      of just fading/zooming in.
-//   3. The CTA uses the studio's cut-corner shape (MagneticButton
-//      shape="cut"), not a generic pill.
+//   2. An opening reveal: two solid doors, meeting at the center, slide
+//      apart to reveal the photo — instead of a flat directional wipe or
+//      a plain fade/zoom. One bold, clean cinematic moment on load, then
+//      completely still. (v2 tried finger-following light + drifting
+//      steam here — reverted: both were too subtle to read as "wow" in a
+//      static screenshot and added an ongoing gimmick instead of one
+//      strong moment. This is deliberately the opposite: bold, then calm.)
+//   3. The CTA is the studio's outline button (MagneticButton), not a
+//      generic filled pill.
 //   4. A designed scroll cue — a thin traveling dot on a vertical line —
 //      instead of a stock chevron icon.
 //   5. A subtle film-grain overlay for texture, tied to scroll position.
@@ -48,48 +48,66 @@ export const ParallaxHero: React.FC<WowHeroProps> = ({ language, onCtaClick }) =
   const cta = hero.ctaLabel[language] ?? hero.ctaLabel.fr;
   const words = headline.split(' ');
 
+  const doorTransition = { duration: 1.0, ease: [0.76, 0, 0.24, 1] as const, delay: 0.15 };
+
   const Media = (
-    <motion.div className="absolute inset-0 overflow-hidden">
-      {/* Opening reveal: photo wipes in from the edge on first mount */}
-      <motion.div
-        initial={{ clipPath: 'inset(0 0 0 100%)' }}
-        animate={{ clipPath: 'inset(0 0 0 0%)' }}
-        onAnimationComplete={() => setRevealed(true)}
-        transition={{ duration: 1.1, ease: [0.76, 0, 0.24, 1] }}
-        className="absolute inset-0"
-      >
-        <motion.div style={{ y }} className="absolute inset-0 -top-16 -bottom-16">
-          <motion.div
-            initial={{ scale: 1.12 }}
-            animate={{ scale: 1 }}
-            transition={{ duration: 8, ease: [0.16, 1, 0.3, 1] }}
-            className="w-full h-full"
-          >
-            {hero.backgroundType === 'video' ? (
-              <video src={hero.backgroundSrc} autoPlay muted loop playsInline className="w-full h-full object-cover" />
-            ) : (
-              <img src={hero.backgroundSrc} alt="" className="w-full h-full object-cover" />
-            )}
-          </motion.div>
-
-          {/* Edge-only brand vignette — center stays true-color/appetizing */}
-          <div
-            className="absolute inset-0 mix-blend-multiply"
-            style={{
-              background: `radial-gradient(ellipse at center, transparent 30%, ${colors.primaryDark} 145%)`,
-              opacity: 0.5,
-            }}
-          />
-          <div className="absolute inset-0" style={{ background: `${colors.background}22` }} />
-
-          {/* Film grain, subtly fading as you scroll past the hero */}
-          <motion.div
-            className="absolute inset-0 mix-blend-overlay"
-            style={{ backgroundImage: `url("${GRAIN_SVG}")`, opacity: grainOpacity }}
-          />
+    <div className="absolute inset-0 overflow-hidden">
+      <motion.div style={{ y }} className="absolute inset-0 -top-16 -bottom-16">
+        <motion.div
+          initial={{ scale: 1.12 }}
+          animate={{ scale: 1 }}
+          transition={{ duration: 8, ease: [0.16, 1, 0.3, 1] }}
+          className="w-full h-full"
+        >
+          {hero.backgroundType === 'video' ? (
+            <video src={hero.backgroundSrc} autoPlay muted loop playsInline className="w-full h-full object-cover" />
+          ) : (
+            <img src={hero.backgroundSrc} alt="" className="w-full h-full object-cover" />
+          )}
         </motion.div>
+
+        {/* Edge-only brand vignette — center stays true-color/appetizing */}
+        <div
+          className="absolute inset-0 mix-blend-multiply"
+          style={{
+            background: `radial-gradient(ellipse at center, transparent 30%, ${colors.primaryDark} 145%)`,
+            opacity: 0.5,
+          }}
+        />
+        <div className="absolute inset-0" style={{ background: `${colors.background}22` }} />
+
+        {/* Film grain, subtly fading as you scroll past the hero */}
+        <motion.div
+          className="absolute inset-0 mix-blend-overlay"
+          style={{ backgroundImage: `url("${grainSvgDataUri}")`, opacity: grainOpacity }}
+        />
       </motion.div>
-    </motion.div>
+
+      {/* Opening reveal: two solid doors meet at the center on mount, then
+          slide apart to reveal the photo underneath — a single bold
+          cinematic moment instead of a directional wipe. */}
+      <motion.div
+        aria-hidden
+        className="absolute inset-y-0 left-0 w-1/2 z-10"
+        style={{ backgroundColor: colors.background }}
+        initial={{ x: '0%' }}
+        animate={{ x: '-100%' }}
+        onAnimationComplete={() => setRevealed(true)}
+        transition={doorTransition}
+      >
+        <div className="absolute inset-y-0 right-0 w-px" style={{ backgroundColor: colors.accent, opacity: 0.6 }} />
+      </motion.div>
+      <motion.div
+        aria-hidden
+        className="absolute inset-y-0 right-0 w-1/2 z-10"
+        style={{ backgroundColor: colors.background }}
+        initial={{ x: '0%' }}
+        animate={{ x: '100%' }}
+        transition={doorTransition}
+      >
+        <div className="absolute inset-y-0 left-0 w-px" style={{ backgroundColor: colors.accent, opacity: 0.6 }} />
+      </motion.div>
+    </div>
   );
 
   return (
@@ -186,17 +204,7 @@ const HeroCopy: React.FC<HeroCopyProps> = ({ words, subheadline, cta, identity, 
     </p>
 
     <div className="mt-8">
-      <MagneticButton
-        onClick={onCtaClick}
-        glowColor={colors.accent}
-        shape="cut"
-        className="px-8 py-4 font-bold text-sm tracking-wide"
-        style={{
-          backgroundColor: colors.primary,
-          color: colors.background,
-          boxShadow: `0 0 0 1px ${colors.textPrimary}26 inset, 0 12px 30px -8px ${colors.primaryDark}CC`,
-        }}
-      >
+      <MagneticButton onClick={onCtaClick} glowColor={colors.accent} shape="cut" className="px-8 py-4 font-bold text-sm tracking-wide">
         {cta}
       </MagneticButton>
     </div>

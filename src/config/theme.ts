@@ -22,15 +22,20 @@ export const radiusTokens = {
   pill: '999px',
 };
 
-// The studio's signature shape for PRIMARY action buttons (hero CTA, "add
-// to cart", "view menu"). Every generic template uses a plain rounded pill
-// for everything — this cut corner is what makes the action button
-// recognizably "Amplify" instead of "default UI library" at a glance, and
-// doubles as a visual cue: "this specific shape = the thing that moves you
-// forward". Icon-only controls (cart icon, language switch) stay circular
-// on purpose — the cut shape is reserved for primary actions so it keeps
-// its meaning instead of being applied everywhere and becoming noise.
+// v1 of the primary-button signature was this cut-corner silhouette. It's
+// kept here (unused by MagneticButton now) in case a future client brand
+// wants an alternate shape — the current signature move for primary CTAs
+// (hero, footer, add-to-cart, checkout) is the page-fold press effect in
+// MagneticButton.tsx: a calm button at rest, one deliberate motion on tap,
+// instead of stacking a glow + ring + particles + nudge on top of a shape.
 export const cutCornerClipPath = 'polygon(0% 0%, 100% 0%, 100% calc(100% - 14px), calc(100% - 14px) 100%, 0% 100%)';
+
+// Grain texture as an inline SVG data-uri (feTurbulence) — no image asset
+// needed, works for every client. Shared by ParallaxHero's film-grain layer
+// AND the global PaperTexture overlay, so both use the exact same noise
+// rather than two similar-but-different textures.
+export const grainSvgDataUri =
+  "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>";
 
 export const shadowTokens = {
   card: '0 10px 40px rgba(0,0,0,0.35)',
