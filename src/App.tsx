@@ -10,6 +10,9 @@ import { CartDrawer } from './components/cart/CartDrawer';
 import { Footer } from './components/layout/Footer';
 import { ParallaxHero } from './components/wow/ParallaxHero';
 import { EditorialMoment } from './components/wow/EditorialMoment';
+import { CustomCursor } from './components/wow/CustomCursor';
+import { IntroTransition } from './components/wow/IntroTransition';
+import { SignatureSpotlight } from './components/wow/SignatureSpotlight';
 import { categories, menuItems } from './data/menu.example'; // -> switch to './data/menu' per client
 import type { Language, MenuItem } from './types';
 
@@ -23,7 +26,7 @@ export default function App() {
   const [openItem, setOpenItem] = useState<MenuItem | null>(null);
 
   const signatureItem = menuItems.find((i) => i.signature);
-  const activeWow = brandConfig.wowModules[0] ?? 'none';
+  const wow = brandConfig.wowModules;
 
   const scrollToMenu = () => {
     document.getElementById(`cat-${categories[0]?.id}`)?.scrollIntoView({ behavior: 'smooth' });
@@ -32,11 +35,16 @@ export default function App() {
   return (
     <CartProvider>
       <div style={cssVarsFromBrand(brandConfig.colors) as React.CSSProperties}>
+        {wow.includes('introTransition') && <IntroTransition />}
+        {wow.includes('customCursor') && <CustomCursor />}
+
         <Header language={language} setLanguage={setLanguage} />
 
-        {activeWow === 'parallaxHero' || brandConfig.wowModules.includes('parallaxHero') ? (
-          <ParallaxHero language={language} onCtaClick={scrollToMenu} />
-        ) : null}
+        {wow.includes('parallaxHero') && <ParallaxHero language={language} onCtaClick={scrollToMenu} />}
+
+        {wow.includes('signatureSpotlight') && signatureItem && (
+          <SignatureSpotlight item={signatureItem} language={language} onAdd={() => setOpenItem(signatureItem)} />
+        )}
 
         <CategoryNav
           categories={categories}
@@ -50,9 +58,7 @@ export default function App() {
 
         <MenuSection categories={categories.slice(0, 1)} items={menuItems} language={language} onOpenItem={setOpenItem} />
 
-        {brandConfig.wowModules.includes('editorialMoment') && (
-          <EditorialMoment language={language} signatureItem={signatureItem} />
-        )}
+        {wow.includes('editorialMoment') && <EditorialMoment language={language} signatureItem={signatureItem} />}
 
         <MenuSection categories={categories.slice(1)} items={menuItems} language={language} onOpenItem={setOpenItem} />
 

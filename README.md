@@ -25,10 +25,12 @@ elk project moet delen.
 3. Vul `brand.config.ts` volledig in — inclusief het echte
    `contact.whatsappNumber` (geen testnummer laten staan).
 4. Maak `src/data/menu.ts` met het echte menu.
-5. Kies 1, max 2 modules in `brand.config.ts -> wowModules`
-   (`parallaxHero`, `editorialMoment` zijn nu gebouwd; overige IDs in
-   `src/types.ts` staan klaar voor uitbreiding: `accent3d`, `customCursor`,
-   `introTransition`, `signatureSpotlight`).
+5. Kies 1, max 2 modules in `brand.config.ts -> wowModules`. Gebouwd en
+   klaar voor gebruik: `parallaxHero`, `editorialMoment`, `customCursor`,
+   `introTransition`, `signatureSpotlight`. `accent3d` (three.js, zoals
+   Japoneza's sushi-canvas) is bewust nog niet generiek gebouwd — dat vraagt
+   een eigen 3D-object per keuken/restaurant en is per klant maatwerk, geen
+   herbruikbare module. Vraag hier apart om als een project dat nodig heeft.
 6. `npm install && npm run dev` om lokaal te checken, `npm run build` voor
    productie.
 7. Test de bestelflow end-to-end: mandje vullen, gegevens invullen, "Order
