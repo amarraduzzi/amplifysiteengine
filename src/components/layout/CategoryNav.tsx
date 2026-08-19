@@ -21,8 +21,8 @@ export const CategoryNav: React.FC<CategoryNavProps> = ({ categories, activeCate
       // mobile where the status strip is hidden, h-20 (5rem) + the ~1.5rem
       // status strip on desktop. Update both together if Header's height
       // classes ever change.
-      className="sticky z-30 top-16 sm:top-[6.5rem] backdrop-blur-md relative"
-      style={{ backgroundColor: `${colors.background}E6`, borderBottom: `1px solid ${colors.border}` }}
+      className="sticky z-30 top-16 sm:top-[6.5rem] relative"
+      style={{ backgroundColor: colors.background, borderBottom: `1px solid ${colors.border}` }}
     >
       <div className="max-w-7xl mx-auto px-4 py-2.5 flex items-center gap-2 overflow-x-auto scrollbar-none">
         {categories.map((cat) => {
