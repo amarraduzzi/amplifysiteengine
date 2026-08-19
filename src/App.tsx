@@ -28,6 +28,14 @@ export default function App() {
   const signatureItem = menuItems.find((i) => i.signature);
   const wow = brandConfig.wowModules;
 
+  // Guard, not just a comment: parallaxHero and signatureSpotlight are both
+  // full-bleed "big photo + big headline" blocks. Stacking them reads as
+  // two hero sections in a row — heavy and repetitive. If a client's config
+  // has both, parallaxHero wins (it's the page opener) and signatureSpotlight
+  // is skipped automatically instead of silently producing a bloated page.
+  const showParallaxHero = wow.includes('parallaxHero');
+  const showSignatureSpotlight = wow.includes('signatureSpotlight') && !showParallaxHero;
+
   const scrollToMenu = () => {
     document.getElementById(`cat-${categories[0]?.id}`)?.scrollIntoView({ behavior: 'smooth' });
   };
@@ -40,9 +48,9 @@ export default function App() {
 
         <Header language={language} setLanguage={setLanguage} />
 
-        {wow.includes('parallaxHero') && <ParallaxHero language={language} onCtaClick={scrollToMenu} />}
+        {showParallaxHero && <ParallaxHero language={language} onCtaClick={scrollToMenu} />}
 
-        {wow.includes('signatureSpotlight') && signatureItem && (
+        {showSignatureSpotlight && signatureItem && (
           <SignatureSpotlight item={signatureItem} language={language} onAdd={() => setOpenItem(signatureItem)} />
         )}
 
@@ -62,7 +70,7 @@ export default function App() {
 
         <MenuSection categories={categories.slice(1)} items={menuItems} language={language} onOpenItem={setOpenItem} />
 
-        <Footer language={language} />
+        <Footer language={language} onViewMenuClick={scrollToMenu} />
 
         <ItemModal item={openItem} language={language} onClose={() => setOpenItem(null)} />
         <CartDrawer language={language} />

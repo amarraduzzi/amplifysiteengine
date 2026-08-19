@@ -11,15 +11,22 @@ interface SignatureSpotlightProps {
 
 // Wow module (Layer 3): "signatureSpotlight". Full-bleed, dramatic feature
 // for the one dish a restaurant wants to sell hardest — big image, floating
-// price tag, direct add action. Meant to be used once, right after the
-// hero, not repeated per category.
+// price tag, direct add action.
+//
+// ⚠ PAIRING RULE: never combine this with "parallaxHero". Both are
+// full-bleed "big photo + big headline" blocks — stacked back to back they
+// read as two hero sections in a row (heavy, repetitive), which is exactly
+// the "too big / too much" feeling a client will flag. Pick ONE big visual
+// statement (parallaxHero OR signatureSpotlight), and pair it with a
+// different-flavor module (editorialMoment, customCursor, introTransition)
+// if a second one is wanted.
 export const SignatureSpotlight: React.FC<SignatureSpotlightProps> = ({ item, language, onAdd }) => {
   const { colors, ordering } = brandConfig;
   const name = item.name[language] ?? item.name.fr;
   const description = item.description?.[language] ?? item.description?.fr;
 
   return (
-    <section className="relative w-full h-[70vh] min-h-[420px] overflow-hidden flex items-center">
+    <section className="relative w-full h-[50vh] min-h-[340px] max-h-[440px] overflow-hidden flex items-center">
       <img src={item.image} alt={name} className="absolute inset-0 w-full h-full object-cover" />
       <div
         className="absolute inset-0"
