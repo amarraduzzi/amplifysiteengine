@@ -12,6 +12,10 @@ interface CartContextValue {
   isDrawerOpen: boolean;
   openDrawer: () => void;
   closeDrawer: () => void;
+  // Increments on every addLine call. Header keys its cart icon/badge on
+  // this value so each add-to-cart gets a visible bounce confirmation —
+  // not just an instant, silent count change.
+  bumpTrigger: number;
 }
 
 const CartContext = createContext<CartContextValue | null>(null);
@@ -24,12 +28,14 @@ function computeLineTotal(item: MenuItem, quantity: number, selectedOptions: Sel
 export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [lines, setLines] = useState<CartLine[]>([]);
   const [isDrawerOpen, setDrawerOpen] = useState(false);
+  const [bumpTrigger, setBumpTrigger] = useState(0);
 
   const addLine = useCallback(
     (item: MenuItem, quantity: number, selectedOptions: SelectedOption[], note?: string) => {
       const lineId = `${item.id}-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
       const lineTotalMAD = computeLineTotal(item, quantity, selectedOptions);
       setLines((prev) => [...prev, { lineId, item, quantity, selectedOptions, note, lineTotalMAD }]);
+      setBumpTrigger((n) => n + 1);
       setDrawerOpen(true);
     },
     []
@@ -65,6 +71,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     isDrawerOpen,
     openDrawer: () => setDrawerOpen(true),
     closeDrawer: () => setDrawerOpen(false),
+    bumpTrigger,
   };
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;

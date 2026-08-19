@@ -2,6 +2,7 @@ import React from 'react';
 import { motion, useScroll, useTransform } from 'motion/react';
 import { ChevronDown } from 'lucide-react';
 import { brandConfig } from '../../config/brand.config';
+import { MagneticButton } from '../ui/MagneticButton';
 import type { Language } from '../../types';
 
 interface WowHeroProps {
@@ -9,16 +10,26 @@ interface WowHeroProps {
   onCtaClick: () => void;
 }
 
-// Wow module (Layer 3): "parallaxHero". This is the single biggest lever
-// for "wow factor" — everything below only has to be sleek and correct,
-// the hero has to actually impress. Three deliberate techniques:
-//   1. A slow Ken Burns zoom on the photo (never fully static).
-//   2. A brand-color duotone grade over the photo (mix-blend-mode), so any
-//      client photo — no matter its own colors — reads as "on-brand"
-//      instead of a stock image dropped on top of a UI.
-//   3. A visible two-tone type system: accent-colored eyebrow label above
-//      an oversized display headline, exactly the editorial contrast that
-//      was flat before.
+const headlineVariants = {
+  hidden: {},
+  visible: { transition: { staggerChildren: 0.055, delayChildren: 0.1 } },
+};
+const wordVariants = {
+  hidden: { opacity: 0, y: 18 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: [0.16, 1, 0.3, 1] as const } },
+};
+
+// Wow module (Layer 3): "parallaxHero". The single biggest lever for "wow
+// factor". Techniques used:
+//   1. Slow Ken Burns zoom on the photo — never fully static.
+//   2. A soft, EDGE-ONLY brand-color vignette (radial, not a flat tint over
+//      the whole image) — ties the photo to the palette without dulling
+//      the food itself. A flat full-image tint looks "branded" but makes
+//      food look less appetizing, which matters more for a restaurant.
+//   3. A two-tone type system: accent eyebrow + oversized display headline,
+//      revealed word-by-word instead of as one flat block.
+//   4. A magnetic, glowing CTA (see ui/MagneticButton) instead of a static
+//      pill button.
 export const ParallaxHero: React.FC<WowHeroProps> = ({ language, onCtaClick }) => {
   const { hero, colors, identity } = brandConfig;
   const { scrollY } = useScroll();
@@ -27,6 +38,7 @@ export const ParallaxHero: React.FC<WowHeroProps> = ({ language, onCtaClick }) =
   const headline = hero.headline[language] ?? hero.headline.fr;
   const subheadline = hero.subheadline[language] ?? hero.subheadline.fr;
   const cta = hero.ctaLabel[language] ?? hero.ctaLabel.fr;
+  const words = headline.split(' ');
 
   return (
     <section id="top" className="relative h-[92vh] min-h-[600px] overflow-hidden flex items-center">
@@ -44,13 +56,17 @@ export const ParallaxHero: React.FC<WowHeroProps> = ({ language, onCtaClick }) =
           )}
         </motion.div>
 
-        {/* Brand duotone grade — ties ANY client photo to the palette
-            without ever touching the source image. */}
+        {/* Edge-only brand vignette: transparent over the center (where the
+            food is) so the dish stays true-color and appetizing, tinted
+            only toward the edges to still feel on-brand. */}
         <div
           className="absolute inset-0 mix-blend-multiply"
-          style={{ background: `linear-gradient(150deg, ${colors.primaryDark} 0%, ${colors.accent} 130%)`, opacity: 0.55 }}
+          style={{
+            background: `radial-gradient(ellipse at center, transparent 30%, ${colors.primaryDark} 145%)`,
+            opacity: 0.5,
+          }}
         />
-        <div className="absolute inset-0" style={{ background: `${colors.background}33` }} />
+        <div className="absolute inset-0" style={{ background: `${colors.background}22` }} />
         {/* Legibility gradient for the text block */}
         <div
           className="absolute inset-0"
@@ -70,22 +86,39 @@ export const ParallaxHero: React.FC<WowHeroProps> = ({ language, onCtaClick }) =
         >
           {identity.city} · {identity.country}
         </span>
-        <h1
+
+        <motion.h1
+          variants={headlineVariants}
+          initial="hidden"
+          animate="visible"
           className="font-display text-[2.6rem] leading-[1.02] sm:text-7xl font-semibold tracking-tight"
           style={{ color: colors.textPrimary }}
         >
-          {headline}
-        </h1>
+          {words.map((word, i) => (
+            <motion.span key={i} variants={wordVariants} className="inline-block mr-[0.28em]">
+              {word}
+            </motion.span>
+          ))}
+        </motion.h1>
+
         <p className="mt-5 text-base sm:text-lg max-w-xl mx-auto" style={{ color: colors.textMuted }}>
           {subheadline}
         </p>
-        <button
-          onClick={onCtaClick}
-          className="mt-8 px-9 py-4 rounded-full font-bold text-sm tracking-wide shadow-2xl transition-transform hover:scale-[1.03]"
-          style={{ backgroundColor: colors.primary, color: colors.background }}
-        >
-          {cta}
-        </button>
+
+        <div className="mt-8">
+          <MagneticButton
+            onClick={onCtaClick}
+            glowColor={colors.accent}
+            className="px-9 py-4 rounded-full font-bold text-sm tracking-wide"
+            style={{
+              backgroundColor: colors.primary,
+              color: colors.background,
+              boxShadow: `0 0 0 1px ${colors.textPrimary}26 inset, 0 12px 30px -8px ${colors.primaryDark}CC`,
+            }}
+          >
+            {cta}
+          </MagneticButton>
+        </div>
       </motion.div>
 
       <motion.div

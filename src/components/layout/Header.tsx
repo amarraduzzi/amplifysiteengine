@@ -2,7 +2,6 @@ import React, { useEffect, useRef, useState } from 'react';
 import { motion } from 'motion/react';
 import { ShoppingBag, Globe, ChevronDown, Check } from 'lucide-react';
 import { brandConfig } from '../../config/brand.config';
-import { motionTokens } from '../../config/theme';
 import { useCart } from '../cart/CartContext';
 import type { Language } from '../../types';
 
@@ -27,7 +26,7 @@ const LANG_LABEL: Record<Language, string> = { fr: 'FR', ar: 'AR', en: 'EN' };
 // (4) shrink-0 on every control, (5) a single compact language button with
 // a dropdown on mobile instead of always showing 3 separate pills.
 export const Header: React.FC<HeaderProps> = ({ language, setLanguage }) => {
-  const { count, totalMAD, openDrawer } = useCart();
+  const { count, totalMAD, openDrawer, bumpTrigger } = useCart();
   const [scrolled, setScrolled] = useState(false);
   const [langMenuOpen, setLangMenuOpen] = useState(false);
   const langRef = useRef<HTMLDivElement>(null);
@@ -141,8 +140,11 @@ export const Header: React.FC<HeaderProps> = ({ language, setLanguage }) => {
           )}
 
           <motion.button
+            key={bumpTrigger}
             whileTap={{ scale: 0.95 }}
-            transition={{ duration: motionTokens.fast }}
+            initial={bumpTrigger > 0 ? { scale: 1.22 } : false}
+            animate={{ scale: 1 }}
+            transition={{ type: 'spring', stiffness: 420, damping: 12 }}
             onClick={openDrawer}
             className="relative flex items-center gap-2 font-bold px-3 sm:px-4 py-2.5 rounded-full shadow-md shrink-0"
             style={{ backgroundColor: colors.primary, color: colors.background }}
@@ -150,12 +152,16 @@ export const Header: React.FC<HeaderProps> = ({ language, setLanguage }) => {
             <div className="relative">
               <ShoppingBag className="w-5 h-5" />
               {count > 0 && (
-                <span
+                <motion.span
+                  key={count}
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ type: 'spring', stiffness: 500, damping: 15 }}
                   className="absolute -top-2 -right-2 text-[10px] font-black w-5 h-5 rounded-full flex items-center justify-center"
                   style={{ backgroundColor: colors.background, color: colors.primary, border: `2px solid ${colors.primary}` }}
                 >
                   {count}
-                </span>
+                </motion.span>
               )}
             </div>
             <span className="hidden sm:inline text-sm whitespace-nowrap">
