@@ -6,6 +6,16 @@ import { BasketIcon } from '../ui/BasketIcon';
 import { useCart } from '../cart/CartContext';
 import type { Language } from '../../types';
 
+// No `identity.logoSrc` in this component at all — that's deliberate. A
+// client-supplied logo file varies wildly in quality (badly cropped,
+// low-res, wrong aspect ratio) and the moment one of those sits in an
+// otherwise considered typographic system, it drags the whole header back
+// down to "generic restaurant site". So the studio's identity mark is
+// ALWAYS typography, never a raster file — same quality on every client,
+// no dependency on what gets uploaded. Pure wordmark, no icon: the first
+// letter gets a slightly bolder/accent treatment (a quiet lettrine, not a
+// separate graphic element) instead of adding a new shape to the header.
+
 interface HeaderProps {
   language: Language;
   setLanguage: (lang: Language) => void;
@@ -35,7 +45,6 @@ export const Header: React.FC<HeaderProps> = ({ language, setLanguage }) => {
   const { count, totalMAD, openDrawer, bumpTrigger } = useCart();
   const [scrolled, setScrolled] = useState(false);
   const [langMenuOpen, setLangMenuOpen] = useState(false);
-  const [logoFailed, setLogoFailed] = useState(false);
   const langRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -63,28 +72,19 @@ export const Header: React.FC<HeaderProps> = ({ language, setLanguage }) => {
       <div className="max-w-7xl mx-auto px-3 sm:px-4 h-16 sm:h-20 flex items-center justify-between gap-2 flex-nowrap">
         <a
           href="#top"
-          className="flex items-center gap-2 min-w-0 shrink"
+          className="flex items-baseline min-w-0 shrink"
           onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
         >
-          {!logoFailed ? (
-            <img
-              src={identity.logoSrc}
-              alt={identity.name}
-              onError={() => setLogoFailed(true)}
-              className="h-8 sm:h-9 w-8 sm:w-9 object-contain shrink-0"
-            />
-          ) : (
-            /* Plain text monogram — no circle, no border, no fill. It's a
-               fallback for a not-yet-uploaded logo, not a chrome element. */
-            <span className="font-display font-bold text-lg shrink-0" style={{ color: colors.primary }}>
-              {identity.name.charAt(0).toUpperCase()}
-            </span>
-          )}
+          {/* Lettrine: the first letter set larger, in the accent color —
+              a quiet typographic mark instead of a separate icon/logo. */}
+          <span className="font-display font-bold text-2xl sm:text-[1.75rem] leading-none shrink-0" style={{ color: colors.accent }}>
+            {identity.name.charAt(0).toUpperCase()}
+          </span>
           <span
-            className="font-display font-semibold text-base sm:text-lg truncate"
+            className="font-display font-semibold text-base sm:text-lg truncate ml-0.5"
             style={{ color: colors.textPrimary }}
           >
-            {identity.name}
+            {identity.name.slice(1)}
           </span>
         </a>
 
@@ -112,7 +112,7 @@ export const Header: React.FC<HeaderProps> = ({ language, setLanguage }) => {
                         setLangMenuOpen(false);
                       }}
                       className="w-full px-3 py-2 text-left text-xs font-bold flex items-center justify-between"
-                      style={{ color: language === lang ? colors.primary : colors.textMuted }}
+                      style={{ color: language === lang ? colors.accent : colors.textMuted }}
                     >
                       {LANG_LABEL[lang]}
                       {language === lang && <Check className="w-3.5 h-3.5" />}
@@ -136,7 +136,7 @@ export const Header: React.FC<HeaderProps> = ({ language, setLanguage }) => {
             transition={{ type: 'spring', stiffness: 420, damping: 12 }}
             onClick={openDrawer}
             className="relative flex items-center gap-2 font-bold shrink-0"
-            style={{ color: colors.primary }}
+            style={{ color: colors.accent }}
           >
             <div className="relative">
               <BasketIcon className="w-5 h-5" />
@@ -147,7 +147,7 @@ export const Header: React.FC<HeaderProps> = ({ language, setLanguage }) => {
                   animate={{ scale: 1 }}
                   transition={{ type: 'spring', stiffness: 500, damping: 15 }}
                   className="absolute -top-2 -right-2 text-[10px] font-black w-4 h-4 rounded-full flex items-center justify-center"
-                  style={{ backgroundColor: colors.primary, color: colors.background }}
+                  style={{ backgroundColor: colors.accent, color: colors.background }}
                 >
                   {count}
                 </motion.span>
