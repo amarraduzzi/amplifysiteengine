@@ -86,9 +86,12 @@ export const Header: React.FC<HeaderProps> = ({ language, setLanguage }) => {
               className="h-8 sm:h-9 w-8 sm:w-9 object-contain shrink-0"
             />
           ) : (
+            /* Thin ring instead of a solid fill — this is just a fallback
+               for a not-yet-uploaded logo, it shouldn't compete visually
+               with the rest of the header. */
             <span
               className="h-8 sm:h-9 w-8 sm:w-9 rounded-full flex items-center justify-center font-display font-bold text-sm shrink-0"
-              style={{ backgroundColor: colors.primary, color: colors.background }}
+              style={{ border: `1.5px solid ${colors.primary}`, color: colors.primary }}
             >
               {identity.name.charAt(0).toUpperCase()}
             </span>
@@ -160,15 +163,23 @@ export const Header: React.FC<HeaderProps> = ({ language, setLanguage }) => {
             </>
           )}
 
+          {/* Empty cart stays quiet (outline, same language as the rest of
+              the site now) — filled/solid only kicks in once there's
+              something in it, since that's the moment it actually matters
+              that the user can find it in one glance. */}
           <motion.button
             key={bumpTrigger}
             whileTap={{ scale: 0.95 }}
             initial={bumpTrigger > 0 ? { scale: 1.22 } : false}
-            animate={{ scale: 1 }}
+            animate={{
+              scale: 1,
+              backgroundColor: count > 0 ? colors.primary : 'transparent',
+              color: count > 0 ? colors.background : colors.primary,
+            }}
             transition={{ type: 'spring', stiffness: 420, damping: 12 }}
             onClick={openDrawer}
-            className="relative flex items-center gap-2 font-bold px-3 sm:px-4 py-2.5 rounded-full shadow-md shrink-0"
-            style={{ backgroundColor: colors.primary, color: colors.background }}
+            className="relative flex items-center gap-2 font-bold px-3 sm:px-4 py-2.5 rounded-full shrink-0"
+            style={{ border: `1.5px solid ${colors.primary}` }}
           >
             <div className="relative">
               <ShoppingBag className="w-5 h-5" />
