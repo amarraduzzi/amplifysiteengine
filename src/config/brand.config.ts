@@ -129,9 +129,9 @@ export const brandConfig: BrandConfig = {
   },
 
   typography: {
-    displayFont: "'Fraunces', serif",
+    displayFont: "'Bodoni Moda', serif",
     bodyFont: "'Inter', sans-serif",
-    displayWeight: 600,
+    displayWeight: 700,
   },
 
   hero: {
