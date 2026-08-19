@@ -1,6 +1,7 @@
 import React, { useRef, useState } from 'react';
 import { motion, useMotionValue, useSpring } from 'motion/react';
 import { ArrowRight } from 'lucide-react';
+import { cutCornerClipPath } from '../../config/theme';
 
 interface MagneticButtonProps {
   children: React.ReactNode;
@@ -9,6 +10,9 @@ interface MagneticButtonProps {
   style?: React.CSSProperties;
   glowColor?: string;
   showArrow?: boolean;
+  // 'cut' = the studio's signature primary-action shape (see theme.ts).
+  // 'pill' = plain rounded, for secondary/inline uses.
+  shape?: 'cut' | 'pill';
 }
 
 // Shared UI primitive (part of the fixed engine, not a wow module — usable
@@ -32,6 +36,7 @@ export const MagneticButton: React.FC<MagneticButtonProps> = ({
   style,
   glowColor,
   showArrow = true,
+  shape = 'cut',
 }) => {
   const ref = useRef<HTMLButtonElement>(null);
   const x = useMotionValue(0);
@@ -57,7 +62,7 @@ export const MagneticButton: React.FC<MagneticButtonProps> = ({
     <span className="relative inline-block">
       {glowColor && (
         <motion.span
-          className="absolute inset-0 rounded-full blur-2xl -z-10"
+          className={`absolute inset-0 blur-2xl -z-10 ${shape === 'pill' ? 'rounded-full' : 'rounded-xl'}`}
           style={{ backgroundColor: glowColor }}
           animate={
             hovering
@@ -78,8 +83,8 @@ export const MagneticButton: React.FC<MagneticButtonProps> = ({
         onMouseEnter={() => setHovering(true)}
         onMouseLeave={reset}
         whileTap={{ scale: 0.94 }}
-        style={{ x: springX, y: springY, ...style }}
-        className={`relative overflow-hidden inline-flex items-center gap-2 ${className ?? ''}`}
+        style={{ x: springX, y: springY, clipPath: shape === 'cut' ? cutCornerClipPath : undefined, ...style }}
+        className={`relative overflow-hidden inline-flex items-center gap-2 ${shape === 'pill' ? 'rounded-full' : 'rounded-lg'} ${className ?? ''}`}
       >
         <span className="relative z-10">{children}</span>
         {showArrow && (

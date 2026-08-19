@@ -2,7 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { X, Minus, Plus } from 'lucide-react';
 import { brandConfig } from '../../config/brand.config';
-import { motionTokens } from '../../config/theme';
+import { motionTokens, cutCornerClipPath } from '../../config/theme';
 import { useCart } from '../cart/CartContext';
 import type { Language, MenuItem, SelectedOption } from '../../types';
 
@@ -170,8 +170,8 @@ export const ItemModal: React.FC<ItemModalProps> = ({ item, language, onClose })
               <button
                 disabled={!requiredGroupsSatisfied}
                 onClick={handleAdd}
-                className="flex-1 py-3 rounded-full font-bold text-sm disabled:opacity-40"
-                style={{ backgroundColor: colors.primary, color: colors.background }}
+                className="flex-1 py-3 rounded-lg font-bold text-sm disabled:opacity-40"
+                style={{ backgroundColor: colors.primary, color: colors.background, clipPath: cutCornerClipPath }}
               >
                 {language === 'fr' ? 'Ajouter' : language === 'ar' ? 'إضافة' : 'Add'} — {unitPrice * quantity} {ordering.currency}
               </button>

@@ -22,6 +22,16 @@ export const radiusTokens = {
   pill: '999px',
 };
 
+// The studio's signature shape for PRIMARY action buttons (hero CTA, "add
+// to cart", "view menu"). Every generic template uses a plain rounded pill
+// for everything — this cut corner is what makes the action button
+// recognizably "Amplify" instead of "default UI library" at a glance, and
+// doubles as a visual cue: "this specific shape = the thing that moves you
+// forward". Icon-only controls (cart icon, language switch) stay circular
+// on purpose — the cut shape is reserved for primary actions so it keeps
+// its meaning instead of being applied everywhere and becoming noise.
+export const cutCornerClipPath = 'polygon(0% 0%, 100% 0%, 100% calc(100% - 14px), calc(100% - 14px) 100%, 0% 100%)';
+
 export const shadowTokens = {
   card: '0 10px 40px rgba(0,0,0,0.35)',
   drawer: '0 10px 40px rgba(0,0,0,0.9)',
