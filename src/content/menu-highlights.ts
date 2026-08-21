@@ -34,6 +34,14 @@ export interface MenuHighlightItem {
   // never substitute a photo of a different dish to fill the gap.
   image?: string;
   imageAlt?: LocalizedText;
+  // Powers the Menu page's "Végétarien" filter (final punch-list item #3).
+  // Deliberately only a vegetarian flag, not vegan — vegetarian is a fact
+  // we can read straight off each dish's own ingredient description (no
+  // meat named), but "vegan" would require certainty about hidden dairy
+  // (ghee in a naan dough, yogurt in a marinade) that isn't verifiable
+  // from this content alone. Same honesty standard as aggregateRating in
+  // testimonials.ts: don't claim what isn't confirmed.
+  vegetarian?: boolean;
 }
 export interface MenuHighlightCategory {
   label: LocalizedText;
@@ -66,7 +74,8 @@ export const menuHighlights: MenuHighlightCategory[] = [
           ar: 'معجنات هندية مقرمشة محشوة بخضروات عطرية متبّلة.',
         },
         priceMAD: 40,
-        image: '/images/dish-samosa.jpg',
+        vegetarian: true,
+        image: '/images/dish-samosa.webp',
         imageAlt: {
           fr: 'Deux samosas végétariens croustillants avec sauce tamarin',
           en: 'Two crispy vegetable samosas with tamarind sauce',
@@ -81,7 +90,8 @@ export const menuHighlights: MenuHighlightCategory[] = [
           ar: 'كرات مقرمشة محشوة بماء حامض متبّل وصلصات الشطني.',
         },
         priceMAD: 45,
-        image: '/images/dish-pani-puri.jpg',
+        vegetarian: true,
+        image: '/images/dish-pani-puri.webp',
         imageAlt: {
           fr: 'Pani puri garnis de pommes de terre, pois chiches et coriandre',
           en: 'Pani puri topped with potatoes, chickpeas and coriander',
@@ -101,7 +111,7 @@ export const menuHighlights: MenuHighlightCategory[] = [
           ar: 'دجاج متبّل بالبهارات واللبن، مشوي في فرن التندور التقليدي.',
         },
         priceMAD: 100,
-        image: '/images/dish-tandoori-chicken.jpg',
+        image: '/images/dish-tandoori-chicken.webp',
         imageAlt: {
           fr: 'Cuisses de poulet tandoori grillées, servies avec oignons et citron',
           en: 'Grilled tandoori chicken legs, served with onions and lemon',
@@ -116,7 +126,7 @@ export const menuHighlights: MenuHighlightCategory[] = [
           ar: 'أسياخ من قطع الدجاج منزوعة العظم والمتبّلة، مطهوة في التندور.',
         },
         priceMAD: 95,
-        image: '/images/dish-chicken-tikka.jpg',
+        image: '/images/dish-chicken-tikka.webp',
         imageAlt: {
           fr: 'Brochettes de chicken tikka grillées, garnies de coriandre fraîche',
           en: 'Grilled chicken tikka skewers, garnished with fresh coriander',
@@ -127,7 +137,7 @@ export const menuHighlights: MenuHighlightCategory[] = [
   },
   {
     label: { fr: 'Hyderabadi Dum Biryani', en: 'Hyderabadi Dum Biryani', ar: 'برياني حيدر آبادي' },
-    image: '/images/gallery-biryani.jpg',
+    image: '/images/gallery-biryani.webp',
     imageAlt: {
       fr: 'Biryani, pani puri et naan servis à table',
       en: 'Biryani, pani puri and naan served at the table',
@@ -156,7 +166,7 @@ export const menuHighlights: MenuHighlightCategory[] = [
   },
   {
     label: { fr: 'Plats Principaux', en: 'Main Courses', ar: 'الأطباق الرئيسية' },
-    image: '/images/gallery-curries.jpg',
+    image: '/images/gallery-curries.webp',
     imageAlt: {
       fr: 'Currys mijotés servis en plat principal',
       en: 'Slow-cooked curries served as a main course',
@@ -185,7 +195,7 @@ export const menuHighlights: MenuHighlightCategory[] = [
   },
   {
     label: { fr: 'Naan, Riz & Nouilles', en: 'Naan, Rice & Noodles', ar: 'خبز النان والأرز والنودلز' },
-    image: '/images/gallery-naan.jpg',
+    image: '/images/gallery-naan.webp',
     imageAlt: {
       fr: 'Naan fait maison, cuit au tandoor',
       en: 'House-made naan, baked in the tandoor',
@@ -200,6 +210,7 @@ export const menuHighlights: MenuHighlightCategory[] = [
           ar: 'خبز نان دافئ منكّه بالثوم الطازج المفروم والكزبرة.',
         },
         priceMAD: 29,
+        vegetarian: true,
       },
       {
         name: 'Cheese Naan',
@@ -209,6 +220,7 @@ export const menuHighlights: MenuHighlightCategory[] = [
           ar: 'خبز تندوري طري محشو بسخاء بالجبن.',
         },
         priceMAD: 35,
+        vegetarian: true,
       },
     ],
   },
@@ -223,6 +235,7 @@ export const menuHighlights: MenuHighlightCategory[] = [
           ar: 'مشروب هندي كريمي من اللبن مع لب المانجو الطازج.',
         },
         priceMAD: 40,
+        vegetarian: true,
       },
     ],
   },

@@ -112,7 +112,7 @@ const restaurantJsonLd = {
   '@context': 'https://schema.org',
   '@type': 'Restaurant',
   name: siteConfig.identity.name,
-  image: new URL('/images/hero-home.jpg', siteConfig.identity.siteUrl).toString(),
+  image: new URL('/images/hero-home.webp', siteConfig.identity.siteUrl).toString(),
   '@id': siteConfig.identity.siteUrl,
   url: siteConfig.identity.siteUrl,
   telephone: siteConfig.contact.phoneDisplay,
@@ -143,12 +143,12 @@ const path = localizedPath('/', lang);
   description={t(copy.metaDescription, lang)}
   path={path}
   lang={lang}
-  ogImage="/images/hero-home.jpg"
+  ogImage="/images/hero-home.webp"
   jsonLd={restaurantJsonLd}
 >
   <!-- Hero -->
   <section class="relative min-h-[640px] sm:h-[92vh] flex items-end sm:items-center overflow-hidden">
-    <img src="/images/hero-home.jpg" alt={t(copy.metaDescription, lang)} class="absolute inset-0 w-full h-full object-cover" />
+    <img src="/images/hero-home.webp" alt={t(copy.metaDescription, lang)} class="absolute inset-0 w-full h-full object-cover" />
     <div class="absolute inset-0" style="background: linear-gradient(0deg, var(--color-background) 15%, rgba(11,11,12,0.35) 55%, rgba(11,11,12,0.55) 100%)"></div>
 
     <div class="relative z-10 max-w-7xl mx-auto px-5 sm:px-8 pb-16 sm:pb-0 w-full">
@@ -217,7 +217,7 @@ const path = localizedPath('/', lang);
   <section class="relative min-h-[480px] sm:h-[78vh] overflow-hidden" data-reveal="scale">
     <div class="ken-burns absolute inset-0">
       <img
-        src="/images/gallery-biryani.jpg"
+        src="/images/gallery-biryani.webp"
         alt={t(copy.platSignatureQuote, lang)}
         class="absolute inset-0 w-full h-full object-cover"
         loading="lazy"
@@ -241,13 +241,13 @@ const path = localizedPath('/', lang);
     <section class="max-w-7xl mx-auto px-5 sm:px-8 py-16 sm:py-24">
       <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4">
         <div class="photo-frame rounded-2xl col-span-2 sm:col-span-1 aspect-square" data-reveal="scale">
-          <img src="/images/gallery-curries.jpg" alt={t(copy.galleryAlt1, lang)} class="w-full h-full object-cover" loading="lazy" />
+          <img src="/images/gallery-curries.webp" alt={t(copy.galleryAlt1, lang)} class="w-full h-full object-cover" loading="lazy" />
         </div>
         <div class="photo-frame rounded-2xl aspect-square" data-reveal="scale" style="transition-delay: 100ms">
-          <img src="/images/gallery-naan.jpg" alt={t(copy.galleryAlt2, lang)} class="w-full h-full object-cover" loading="lazy" />
+          <img src="/images/gallery-naan.webp" alt={t(copy.galleryAlt2, lang)} class="w-full h-full object-cover" loading="lazy" />
         </div>
         <div class="photo-frame rounded-2xl aspect-square" data-reveal="scale" style="transition-delay: 200ms">
-          <img src="/images/gallery-spread.jpg" alt={t(copy.galleryAlt3, lang)} class="w-full h-full object-cover" loading="lazy" />
+          <img src="/images/gallery-spread.webp" alt={t(copy.galleryAlt3, lang)} class="w-full h-full object-cover" loading="lazy" />
         </div>
       </div>
     </section>

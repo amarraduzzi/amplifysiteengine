@@ -1,0 +1,84 @@
+---
+// Live "open now / closed" badge — final punch-list item #4. Computed
+// entirely client-side from the restaurant's real local time (Africa/
+// Casablanca), not the visitor's own timezone/clock, since someone
+// checking this page from abroad needs to know if the RESTAURANT is open,
+// not what time it happens to be wherever they are.
+//
+// Server-rendered as a neutral placeholder (no dot, no claim) and filled
+// in by a tiny inline script on 'astro:page-load' — this is a static site
+// with no per-request server, so "now" can only ever be known in the
+// browser. The placeholder means a visitor with JS disabled just sees the
+// plain opening-hours text next to it with no incorrect claim attached,
+// rather than a wrong or stale "open"/"closed" baked in at build time.
+import { siteConfig } from '../config/site.config';
+import { t, type Language } from '../i18n/languages';
+import { common } from '../i18n/ui';
+
+interface Props {
+  lang?: Language;
+}
+const { lang = 'fr' } = Astro.props;
+const { open, close } = siteConfig.contact.hours;
+---
+<span
+  class="open-status-badge inline-flex items-center gap-1.5"
+  data-open-hour={open}
+  data-close-hour={close}
+  data-label-open={t(common.ouvertMaintenant, lang)}
+  data-label-closed={t(common.fermeMaintenant, lang)}
+>
+</span>
+
+<style>
+  .open-status-badge {
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+  }
+  .open-status-badge .dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 999px;
+    flex-shrink: 0;
+  }
+  .open-status-badge[data-state='open'] .dot {
+    background-color: #3fbf60;
+    box-shadow: 0 0 0 3px color-mix(in srgb, #3fbf60 25%, transparent);
+  }
+  .open-status-badge[data-state='closed'] .dot {
+    background-color: var(--color-text-muted);
+  }
+  .open-status-badge[data-state='open'] {
+    color: #3fbf60;
+  }
+  .open-status-badge[data-state='closed'] {
+    color: var(--color-text-muted);
+  }
+</style>
+
+<script>
+  // Africa/Casablanca specifically (not the visitor's local timezone) —
+  // this is what makes the badge correct for a visitor browsing from
+  // abroad. Re-runs on 'astro:page-load' like every other sitewide script
+  // in this project, so it re-evaluates on every page reached via a View
+  // Transitions navigation, not just the very first load.
+  document.addEventListener('astro:page-load', () => {
+    document.querySelectorAll('.open-status-badge').forEach((badge) => {
+      const openHour = Number(badge.getAttribute('data-open-hour'));
+      const closeHour = Number(badge.getAttribute('data-close-hour'));
+      if (Number.isNaN(openHour) || Number.isNaN(closeHour)) return;
+
+      const hourInCasablanca = Number(
+        new Intl.DateTimeFormat('en-GB', { timeZone: 'Africa/Casablanca', hour: 'numeric', hour12: false }).format(
+          new Date()
+        )
+      );
+      const isOpen = hourInCasablanca >= openHour && hourInCasablanca < closeHour;
+
+      badge.setAttribute('data-state', isOpen ? 'open' : 'closed');
+      const label = isOpen ? badge.getAttribute('data-label-open') : badge.getAttribute('data-label-closed');
+      badge.innerHTML = `<span class="dot"></span><span>${label}</span>`;
+    });
+  });
+</script>

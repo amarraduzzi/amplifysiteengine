@@ -1,0 +1,87 @@
+---
+// Floating WhatsApp button, site-wide — final punch-list item #1 (first
+// flagged early in this project as "deferred to later", now shipped).
+// For this market a WhatsApp message is often the first move over calling
+// or a contact form — siteConfig.contact.whatsappNumber already existed
+// and was only ever rendered inline on the Contact page; this makes it
+// reachable from every page, all the time, the way a real restaurant site
+// in Morocco is expected to behave.
+//
+// Deliberately plain vanilla, no JS: a real wa.me link, no click-tracking
+// hijack, works even with JS disabled — consistent with the rest of this
+// site's "static, no unnecessary client-side dependency" philosophy.
+import { siteConfig } from '../config/site.config';
+import { t, isRTL, type Language } from '../i18n/languages';
+import { common } from '../i18n/ui';
+
+interface Props {
+  lang?: Language;
+}
+const { lang = 'fr' } = Astro.props;
+const rtl = isRTL(lang);
+const { whatsappNumber } = siteConfig.contact;
+---
+{whatsappNumber && (
+  <a
+    href={`https://wa.me/${whatsappNumber}`}
+    target="_blank"
+    rel="noreferrer"
+    aria-label={t(common.whatsapp, lang)}
+    class="whatsapp-fab"
+    class:list={[rtl ? 'whatsapp-fab-left' : 'whatsapp-fab-right']}
+  >
+    <svg width="26" height="26" viewBox="0 0 24 24" fill="none">
+      <path
+        d="M3 21l1.4-4.2A8 8 0 1110 19.6L3 21z"
+        stroke="currentColor"
+        stroke-width="1.6"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      />
+      <path d="M8 10c0 3 3 6 6 6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" />
+    </svg>
+  </a>
+)}
+
+<style>
+  .whatsapp-fab {
+    position: fixed;
+    bottom: 20px;
+    z-index: 45;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 52px;
+    height: 52px;
+    border-radius: 999px;
+    background-color: #25d366;
+    color: #0b0b0c;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+    transition:
+      transform 0.2s ease,
+      box-shadow 0.2s ease;
+  }
+  .whatsapp-fab-right {
+    right: 18px;
+  }
+  .whatsapp-fab-left {
+    left: 18px;
+  }
+  .whatsapp-fab:hover {
+    transform: scale(1.08);
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.45);
+  }
+  @media (min-width: 640px) {
+    .whatsapp-fab {
+      bottom: 28px;
+      width: 58px;
+      height: 58px;
+    }
+    .whatsapp-fab-right {
+      right: 28px;
+    }
+    .whatsapp-fab-left {
+      left: 28px;
+    }
+  }
+</style>

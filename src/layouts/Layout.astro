@@ -1,7 +1,9 @@
 ---
+import { ViewTransitions } from 'astro:transitions';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import Seo from '../components/Seo.astro';
+import WhatsAppButton from '../components/WhatsAppButton.astro';
 import { siteConfig } from '../config/site.config';
 import { isRTL, type Language } from '../i18n/languages';
 import '../styles/global.css';
@@ -39,6 +41,15 @@ const colorOverrides = `:root{--color-primary:${siteConfig.colors.primary};--col
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <Seo title={title} description={description} path={path} lang={lang} ogImage={ogImage} jsonLd={jsonLd} noindex={noindex} />
     <style set:html={colorOverrides} />
+    <!-- Astro's built-in View Transitions — final punch-list item #2. Turns
+         page-to-page navigation into a soft cross-fade instead of a hard
+         reload, at near-zero cost (no framework runtime, this is a native
+         browser API Astro wires up for us). Every page keeps working with
+         JS disabled or on browsers without View Transitions support — it's
+         strictly progressive enhancement, never a requirement to navigate,
+         which matters for a site whose whole architecture is built around
+         being readable without JS (see astro.config.mjs). -->
+    <ViewTransitions />
     <!-- Fonts: same pair as the order-landing-page engine (Bodoni Moda display
          + Inter body) so the two sites read as one family. Noto Naskh Arabic
          added for the /ar/ pages — Bodoni Moda has no Arabic glyphs at all,
@@ -58,23 +69,32 @@ const colorOverrides = `:root{--color-primary:${siteConfig.colors.primary};--col
       <slot />
     </main>
     <Footer lang={lang} />
+    <WhatsAppButton lang={lang} />
 
     <script>
       // Sitewide scroll-reveal — see the [data-reveal] rules in global.css
       // for what this toggles. One observer, reused for every element with
       // the attribute, on every page (no per-page wiring needed).
-      const observer = new IntersectionObserver(
-        (entries) => {
-          for (const entry of entries) {
-            if (entry.isIntersecting) {
-              entry.target.classList.add('is-visible');
-              observer.unobserve(entry.target);
+      //
+      // Wrapped in 'astro:page-load' (fires on first load AND after every
+      // View Transitions navigation) instead of running once at parse time
+      // — without this, [data-reveal] elements on any page reached via
+      // client-side navigation after the first would never get observed,
+      // since a plain top-level script only runs once per real page load.
+      document.addEventListener('astro:page-load', () => {
+        const observer = new IntersectionObserver(
+          (entries) => {
+            for (const entry of entries) {
+              if (entry.isIntersecting) {
+                entry.target.classList.add('is-visible');
+                observer.unobserve(entry.target);
+              }
             }
-          }
-        },
-        { threshold: 0.15, rootMargin: '0px 0px -40px 0px' }
-      );
-      document.querySelectorAll('[data-reveal]').forEach((el) => observer.observe(el));
+          },
+          { threshold: 0.15, rootMargin: '0px 0px -40px 0px' }
+        );
+        document.querySelectorAll('[data-reveal]').forEach((el) => observer.observe(el));
+      });
     </script>
 
     <script>
@@ -85,17 +105,23 @@ const colorOverrides = `:root{--color-primary:${siteConfig.colors.primary};--col
       // power" without extra color/ornament looks like — the element
       // itself feels alive to touch instead of announcing itself with a
       // louder paint job.
-      const strength = 18;
-      document.querySelectorAll('[data-magnetic]').forEach((el) => {
-        const button = el;
-        button.addEventListener('mousemove', (e) => {
-          const rect = button.getBoundingClientRect();
-          const relX = (e.clientX - rect.left - rect.width / 2) / rect.width;
-          const relY = (e.clientY - rect.top - rect.height / 2) / rect.height;
-          button.style.transform = `translate(${relX * strength}px, ${relY * strength}px)`;
-        });
-        button.addEventListener('mouseleave', () => {
-          button.style.transform = 'translate(0, 0)';
+      //
+      // Same 'astro:page-load' wrapping as the reveal observer above, for
+      // the same reason — otherwise the magnetic effect silently stops
+      // working on any page reached via a client-side View Transition.
+      document.addEventListener('astro:page-load', () => {
+        const strength = 18;
+        document.querySelectorAll('[data-magnetic]').forEach((el) => {
+          const button = el;
+          button.addEventListener('mousemove', (e) => {
+            const rect = button.getBoundingClientRect();
+            const relX = (e.clientX - rect.left - rect.width / 2) / rect.width;
+            const relY = (e.clientY - rect.top - rect.height / 2) / rect.height;
+            button.style.transform = `translate(${relX * strength}px, ${relY * strength}px)`;
+          });
+          button.addEventListener('mouseleave', () => {
+            button.style.transform = 'translate(0, 0)';
+          });
         });
       });
     </script>

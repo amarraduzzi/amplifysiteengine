@@ -66,6 +66,16 @@ export interface SiteConfig {
     address: string;
     mapsUrl?: string;
     openingHours: LocalizedString;
+    // Structured, machine-readable hours for the live "open now / closed"
+    // badge (final punch-list item #4) — kept separate from the free-text
+    // `openingHours` above on purpose: parsing "13:00 - 23:00" out of a
+    // translated sentence at runtime is fragile (format changes per
+    // language, e.g. English's "1:00 PM – 11:00 PM"), while these two plain
+    // 24h numbers are unambiguous and can't drift out of sync with a
+    // wording change. Restaurant is open every day, same hours — if that
+    // ever changes to different hours per day, this becomes a per-day
+    // structure instead of two flat numbers.
+    hours: { open: number; close: number };
     instagramUrl?: string;
     facebookUrl?: string;
   };
@@ -120,6 +130,7 @@ export const siteConfig: SiteConfig = {
       en: 'Open every day: 1:00 PM – 11:00 PM',
       ar: 'مفتوح كل يوم: 13:00 - 23:00',
     },
+    hours: { open: 13, close: 23 },
     instagramUrl: 'https://www.instagram.com/indianflavors.ma/',
     facebookUrl: 'https://www.facebook.com/indianflavors.ma/',
   },

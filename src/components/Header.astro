@@ -43,7 +43,7 @@ const langLinks = LANGUAGES.map((l) => ({ lang: l, href: localizedPath(currentPa
 <header id="site-header" class="sticky top-0 z-40 transition-all duration-300" data-scrolled="false">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 h-16 sm:h-20 flex items-center justify-between gap-4">
     <a href={localizedPath('/', lang)} class="flex items-center gap-2 min-w-0 shrink">
-      <img src="/images/logo-mark.png" alt="" width="36" height="36" class="w-8 h-8 sm:w-9 sm:h-9 shrink-0 rounded-full" />
+      <img src="/images/logo-mark.webp" alt="" width="36" height="36" class="w-8 h-8 sm:w-9 sm:h-9 shrink-0 rounded-full" />
       <span class="font-display font-semibold text-base sm:text-lg truncate" style="color: var(--color-text-primary)">
         {siteConfig.identity.name}
       </span>
@@ -157,24 +157,41 @@ const langLinks = LANGUAGES.map((l) => ({ lang: l, href: localizedPath(currentPa
 </style>
 
 <script>
-  const header = document.getElementById('site-header');
-  const progress = document.getElementById('header-progress');
-  const toggle = document.getElementById('mobile-nav-toggle');
-  const panel = document.getElementById('mobile-nav-panel');
+  // Wrapped in 'astro:page-load' (fires on first load AND after every View
+  // Transitions client-side navigation — see Layout.astro's scripts for the
+  // same pattern). The header re-renders on every navigation (different
+  // active nav item, different lang-switcher state per page), so its old
+  // DOM nodes and any listeners bound to them are gone after a transition;
+  // this re-queries fresh nodes and rebinds every time instead of only once.
+  // `scrollHandler` is tracked at module scope purely to remove the
+  // previous page's `window` scroll listener first — `window` itself isn't
+  // swapped between navigations, so without this, every navigation would
+  // stack another listener on top instead of replacing it.
+  let scrollHandler = null;
 
-  function onScroll() {
-    if (!header || !progress) return;
-    const scrolled = window.scrollY > 8;
-    header.dataset.scrolled = String(scrolled);
-    const max = document.documentElement.scrollHeight - window.innerHeight;
-    const pct = max > 0 ? Math.min(1, window.scrollY / max) : 0;
-    progress.style.width = `${pct * 100}%`;
-  }
-  onScroll();
-  window.addEventListener('scroll', onScroll, { passive: true });
+  document.addEventListener('astro:page-load', () => {
+    const header = document.getElementById('site-header');
+    const progress = document.getElementById('header-progress');
+    const toggle = document.getElementById('mobile-nav-toggle');
+    const panel = document.getElementById('mobile-nav-panel');
 
-  toggle?.addEventListener('click', () => {
-    const isOpen = panel?.classList.toggle('open');
-    toggle.setAttribute('aria-expanded', String(Boolean(isOpen)));
+    function onScroll() {
+      if (!header || !progress) return;
+      const scrolled = window.scrollY > 8;
+      header.dataset.scrolled = String(scrolled);
+      const max = document.documentElement.scrollHeight - window.innerHeight;
+      const pct = max > 0 ? Math.min(1, window.scrollY / max) : 0;
+      progress.style.width = `${pct * 100}%`;
+    }
+    onScroll();
+
+    if (scrollHandler) window.removeEventListener('scroll', scrollHandler);
+    scrollHandler = onScroll;
+    window.addEventListener('scroll', scrollHandler, { passive: true });
+
+    toggle?.addEventListener('click', () => {
+      const isOpen = panel?.classList.toggle('open');
+      toggle.setAttribute('aria-expanded', String(Boolean(isOpen)));
+    });
   });
 </script>
