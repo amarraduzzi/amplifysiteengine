@@ -1,0 +1,138 @@
+---
+// See HomeContent.astro's top comment for the shared-body-per-route
+// pattern this and every other src/content-pages/*.astro file follows.
+import Layout from '../layouts/Layout.astro';
+import PageHero from '../components/PageHero.astro';
+import Ornament from '../components/Ornament.astro';
+import { siteConfig } from '../config/site.config';
+import { aggregateRating } from '../content/testimonials';
+import { t, localizedPath, type Language } from '../i18n/languages';
+import { place } from '../i18n/ui';
+
+interface Props {
+  lang?: Language;
+}
+const { lang = 'fr' } = Astro.props;
+
+const { name } = siteConfig.identity;
+const primaryKeyword = t(siteConfig.identity.primaryKeyword, lang);
+const city = t(place.city, lang);
+
+const copy = {
+  metaTitle: {
+    fr: `À propos — ${name}, ${primaryKeyword} à ${city}`,
+    en: `About — ${name}, ${primaryKeyword} in ${city}`,
+    ar: `من نحن — ${name}, ${primaryKeyword} في ${city}`,
+  },
+  metaDescription: {
+    fr: `L'histoire de ${name}, ${primaryKeyword} à ${city} : recettes familiales, épices importées et cuisson au tandoor traditionnel.`,
+    en: `The story of ${name}, ${primaryKeyword} in ${city}: family recipes, imported spices and traditional tandoor cooking.`,
+    ar: `قصة ${name}, ${primaryKeyword} في ${city}: وصفات عائلية، توابل مستوردة وطهي تقليدي في التندور.`,
+  },
+  kicker: { fr: 'Notre histoire', en: 'Our story', ar: 'قصتنا' },
+  heroTitle: { fr: `À propos de ${name}`, en: `About ${name}`, ar: `عن ${name}` },
+  heroAlt: {
+    fr: `Intérieur du ${primaryKeyword} ${name}`,
+    en: `Interior of ${name}, ${primaryKeyword}`,
+    ar: `داخل ${name}, ${primaryKeyword}`,
+  },
+  p1: {
+    fr: `${name} est né d'une conviction simple : ${city} méritait un ${primaryKeyword} qui ne transige ni sur les épices, ni sur les techniques de cuisson traditionnelles. Pas de recettes édulcorées pour le marché local — le même goût que celui que l'on trouve dans les cuisines familiales du nord de l'Inde.`,
+    en: `${name} was born from a simple conviction: ${city} deserved a ${primaryKeyword} that would not compromise on spices or on traditional cooking techniques. No watered-down recipes for the local market — the same taste you'd find in family kitchens across northern India.`,
+    ar: `وُلد ${name} من قناعة بسيطة: تستحق ${city} ${primaryKeyword} لا يتنازل عن التوابل ولا عن تقنيات الطهي التقليدية. لا وصفات مخففة لإرضاء السوق المحلي — بل نفس المذاق الذي تجده في المطابخ العائلية بشمال الهند.`,
+  },
+  p2: {
+    fr: 'Notre four tandoor en argile, chauffé au charbon, est au centre de la cuisine : c\'est lui qui donne aux pains naan leur croûte caractéristique et aux grillades leur fumé si particulier. Chaque plat est préparé à la commande, jamais à l\'avance.',
+    en: 'Our clay tandoor oven, heated with charcoal, sits at the heart of the kitchen — it\'s what gives our naan bread its signature crust and our grilled dishes their distinctive smokiness. Every dish is cooked to order, never in advance.',
+    ar: 'يقع فرن التندور الطيني، المُسخّن بالفحم، في قلب المطبخ — وهو ما يمنح خبز النان قشرته المميزة والمشويات نكهتها المدخنة الخاصة. يُحضّر كل طبق عند الطلب، لا مسبقًا أبدًا.',
+  },
+  p3: {
+    fr: 'Les épices sont importées directement, moulues sur place, et nos recettes suivent celles transmises depuis plusieurs générations. C\'est ce soin, plus que n\'importe quel argument marketing, qui fait revenir nos clients.',
+    en: 'The spices are imported directly and ground on-site, and our recipes follow those passed down through several generations. It\'s this care, more than any marketing argument, that keeps our customers coming back.',
+    ar: 'تُستورد التوابل مباشرة وتُطحن في المكان، وتتبع وصفاتنا تلك المتوارثة عبر أجيال عديدة. هذا الاهتمام، أكثر من أي حجة تسويقية، هو ما يجعل زبائننا يعودون دائمًا.',
+  },
+  statAns: { fr: "ans d'expérience en cuisine indienne", en: 'years of experience in Indian cuisine', ar: 'سنوات خبرة في المطبخ الهندي' },
+  statPlats: { fr: 'plats préparés à la commande', en: 'dishes cooked to order', ar: 'أطباق تُحضّر عند الطلب' },
+  statAvis: { fr: 'avis Tripadvisor', en: 'Tripadvisor reviews', ar: 'تقييم على Tripadvisor' },
+  noteMoyenne: { fr: 'note moyenne', en: 'average rating', ar: 'متوسط التقييم' },
+} satisfies Record<string, { fr: string; en: string; ar: string }>;
+
+const path = localizedPath('/a-propos', lang);
+---
+<Layout
+  title={t(copy.metaTitle, lang)}
+  description={t(copy.metaDescription, lang)}
+  path={path}
+  lang={lang}
+>
+  <PageHero
+    kicker={t(copy.kicker, lang)}
+    title={t(copy.heroTitle, lang)}
+    image="/images/interior-1.jpg"
+    alt={t(copy.heroAlt, lang)}
+  />
+  <section class="relative max-w-3xl mx-auto px-5 sm:px-8 pt-12 sm:pt-16 pb-20 overflow-hidden">
+    <!-- Large faded emblem behind the copy — the real gold mark, not a
+         generic decorative shape, used at a scale it can never appear at
+         in the header. A quiet "wow" texture instead of another flat
+         paragraph block. -->
+    <img
+      src="/images/logo-mark.png"
+      alt=""
+      aria-hidden="true"
+      class="mark-watermark w-[26rem] h-[26rem] -right-32 -top-16 sm:-right-24"
+    />
+    <div class="relative space-y-5 text-sm sm:text-base leading-relaxed" style="color: var(--color-text-muted)" data-reveal>
+      <p>{t(copy.p1, lang)}</p>
+      <p>{t(copy.p2, lang)}</p>
+      <p>{t(copy.p3, lang)}</p>
+    </div>
+  </section>
+
+  <!-- Oversized, unboxed numbers instead of three identical grey tiles.
+       First pass of this looked fine on desktop's 3-column grid but flat
+       on mobile — a border-left divider does nothing once the grid stacks
+       to one column, so it was just three plain lines of text in a row.
+       Fixed: each stat gets its own small icon (so it reads as a distinct
+       moment, not just a number), the divider switches to a horizontal
+       rule on mobile / vertical rule on desktop, and a soft red glow sits
+       behind the whole band so it isn't just another flat tinted box. -->
+  <div class="section-tint relative overflow-hidden">
+    <div class="section-glow" style="width: 340px; height: 340px; background: var(--color-primary); opacity: 0.07; left: 50%; top: -120px; transform: translateX(-50%);"></div>
+    <section class="relative max-w-3xl mx-auto px-5 sm:px-8 py-16 sm:py-20">
+      <div class="grid sm:grid-cols-3 gap-10 sm:gap-6">
+        {[
+          {
+            n: '10+',
+            l: t(copy.statAns, lang),
+            icon: 'M12 2c-1 3-4 4-4 8a4 4 0 008 0c0-4-3-5-4-8zM6 20h12',
+          },
+          {
+            n: '100%',
+            l: t(copy.statPlats, lang),
+            icon: 'M5 21V9a7 7 0 0114 0v12M5 21h14M9 21v-6h6v6',
+          },
+          {
+            n: `${aggregateRating.ratingValue}/5`,
+            l: `${t(copy.noteMoyenne, lang)} · ${aggregateRating.reviewCount} ${t(copy.statAvis, lang)}`,
+            icon: 'M12 2.5l2.9 6.1 6.6.7-4.9 4.6 1.3 6.6L12 17.3l-5.9 3.2 1.3-6.6-4.9-4.6 6.6-.7z',
+          },
+        ].map((stat, i) => (
+          <div
+            class={`text-center sm:text-left pb-8 sm:pb-0 sm:pl-8 ${i > 0 ? 'border-t sm:border-t-0 sm:border-l pt-8 sm:pt-0' : ''}`}
+            style={`border-color: var(--color-border); transition-delay: ${i * 100}ms`}
+            data-reveal
+          >
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-width="1.5" class="mb-3 mx-auto sm:mx-0" style="color: var(--color-accent)">
+              <path d={stat.icon} stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+            <p class="stat-huge">{stat.n}</p>
+            <p class="text-xs mt-2 max-w-[14rem] mx-auto sm:mx-0" style="color: var(--color-text-muted)">{stat.l}</p>
+          </div>
+        ))}
+      </div>
+    </section>
+  </div>
+
+  <Ornament />
+</Layout>

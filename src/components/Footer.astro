@@ -1,0 +1,141 @@
+---
+import { siteConfig } from '../config/site.config';
+import { getOrderCtaLabel } from '../lib/nav';
+import { aggregateRating } from '../content/testimonials';
+import { localizedPath, t, type Language } from '../i18n/languages';
+import { nav as navUi, common, footer as footerUi } from '../i18n/ui';
+import Button from './Button.astro';
+
+interface Props {
+  lang?: Language;
+}
+const { lang = 'fr' } = Astro.props;
+const orderCtaLabel = getOrderCtaLabel(lang);
+
+// Menu and Avis are the two links that actually move the business (the
+// order flow lives behind Menu, and Avis is the page carrying the real
+// Tripadvisor proof) — everything else in the footer nav had identical
+// visual weight before, so nothing pulled the eye toward what mattered.
+const nav = [
+  { href: '/', label: t(navUi.accueil, lang), emphasis: false },
+  { href: '/menu', label: t(navUi.menu, lang), emphasis: true },
+  { href: '/a-propos', label: t(navUi.aPropos, lang), emphasis: false },
+  { href: '/avis', label: t(navUi.avis, lang), emphasis: true },
+  { href: '/faq', label: t(navUi.faq, lang), emphasis: false },
+  { href: '/contact', label: t(navUi.contact, lang), emphasis: false },
+].map((item) => ({ ...item, href: localizedPath(item.href, lang) }));
+
+const ratingRounded = Math.round(Number(aggregateRating.ratingValue));
+const ratingStars = '★'.repeat(ratingRounded) + '☆'.repeat(5 - ratingRounded);
+---
+<footer class="relative overflow-hidden" style="background-color: var(--color-surface); border-top: 1px solid var(--color-border)">
+  <!-- The footer used to be flat #131315 with a thin top border — the one
+       place on the site with zero texture even though every other section
+       by now has a glow, a watermark or a tint. This gives the closing
+       section the same weight as the opening one instead of the page just
+       "stopping". -->
+  <img
+    src="/images/logo-mark.png"
+    alt=""
+    aria-hidden="true"
+    class="mark-watermark w-[22rem] h-[22rem] -right-24 -bottom-28 hidden sm:block"
+  />
+  <div class="section-glow" style="width: 320px; height: 320px; background: var(--color-primary); opacity: 0.05; left: -110px; bottom: -110px;"></div>
+
+  <div class="relative max-w-7xl mx-auto px-5 sm:px-8 py-14 grid sm:grid-cols-3 gap-10">
+    <div>
+      <div class="flex items-center gap-3">
+        <img src="/images/logo-mark.png" alt="" width="44" height="44" class="w-11 h-11 rounded-full shrink-0" />
+        <div>
+          <span class="text-[11px] font-bold uppercase tracking-[0.2em]" style="color: var(--color-accent)">
+            {siteConfig.identity.city}
+          </span>
+          <h3 class="font-display text-2xl font-semibold" style="color: var(--color-text-primary)">
+            {siteConfig.identity.name}
+          </h3>
+        </div>
+      </div>
+      <p class="text-sm mt-3 max-w-xs" style="color: var(--color-text-muted)">
+        {t(siteConfig.identity.tagline, lang)}
+      </p>
+      <!-- Trust signal, repeated here quietly — the badge on Home is above
+           the fold where a first-time visitor sees it; this is the last
+           thing someone sees before they leave the site, real proof one
+           more time instead of nothing. -->
+      <p class="mt-3 flex items-center gap-1.5 text-xs font-bold" style="color: var(--color-accent)">
+        <span style="letter-spacing: 1px">{ratingStars}</span>
+        {aggregateRating.ratingValue}/5 · {aggregateRating.reviewCount} {t(common.avisTripadvisorSuffix, lang)}
+      </p>
+      <div class="mt-5 flex flex-wrap items-center gap-3">
+        <Button href={orderCtaLabel.href} external>{orderCtaLabel.label}</Button>
+        {siteConfig.contact.instagramUrl && (
+          <a
+            href={siteConfig.contact.instagramUrl}
+            target="_blank"
+            rel="noreferrer"
+            aria-label={`${siteConfig.identity.name} ${lang === 'ar' ? 'على' : lang === 'en' ? 'on' : 'sur'} Instagram`}
+            class="footer-social inline-flex items-center justify-center w-11 h-11 rounded-full transition-colors"
+            style="border: 1.5px solid var(--color-border); color: var(--color-text-muted)"
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+              <rect x="3" y="3" width="18" height="18" rx="5" stroke="currentColor" stroke-width="1.6" />
+              <circle cx="12" cy="12" r="4" stroke="currentColor" stroke-width="1.6" />
+              <circle cx="17.2" cy="6.8" r="1.1" fill="currentColor" />
+            </svg>
+          </a>
+        )}
+        {siteConfig.contact.facebookUrl && (
+          <a
+            href={siteConfig.contact.facebookUrl}
+            target="_blank"
+            rel="noreferrer"
+            aria-label={`${siteConfig.identity.name} ${lang === 'ar' ? 'على' : lang === 'en' ? 'on' : 'sur'} Facebook`}
+            class="footer-social inline-flex items-center justify-center w-11 h-11 rounded-full transition-colors"
+            style="border: 1.5px solid var(--color-border); color: var(--color-text-muted)"
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+              <path
+                d="M15 8.5h-2c-.55 0-1 .45-1 1V12h3l-.4 3H12v7h-3v-7H7v-3h2V9.2C9 6.9 10.4 5.5 12.5 5.5H15v3z"
+                stroke="currentColor"
+                stroke-width="1.4"
+                stroke-linejoin="round"
+              />
+            </svg>
+          </a>
+        )}
+      </div>
+    </div>
+
+    <div class="space-y-3 text-sm" style="color: var(--color-text-muted)">
+      <p>{siteConfig.contact.address}</p>
+      <p><a href={siteConfig.contact.phoneHref} class="hover:underline">{siteConfig.contact.phoneDisplay}</a></p>
+      <p>{t(siteConfig.contact.openingHours, lang)}</p>
+    </div>
+
+    <nav class="flex flex-col gap-2.5 sm:items-end text-sm">
+      {nav.map((item) => (
+        <a
+          href={item.href}
+          style={`color: ${item.emphasis ? 'var(--color-accent)' : 'var(--color-text-muted)'}`}
+          class={`hover:underline ${item.emphasis ? 'font-bold' : ''}`}
+        >
+          {item.label}
+        </a>
+      ))}
+    </nav>
+  </div>
+
+  <div class="relative" style="border-top: 1px solid var(--color-border)">
+    <p class="text-center text-[11px] py-4" style="color: var(--color-text-muted)">
+      {siteConfig.identity.name} · {new Date().getFullYear()} · {t(footerUi.builtBy, lang)} ·{' '}
+      <a href={localizedPath('/confidentialite', lang)} class="hover:underline">{t(footerUi.confidentialite, lang)}</a>
+    </p>
+  </div>
+</footer>
+
+<style>
+  .footer-social:hover {
+    color: var(--color-accent);
+    border-color: var(--color-accent);
+  }
+</style>

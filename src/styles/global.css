@@ -1,0 +1,303 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ============================================================================
+   Design tokens — DELIBERATELY the exact same values as the order-landing-
+   page engine's brand.config.ts defaults (colors, fonts, grain overlay).
+   This is what makes the marketing site and the order page read as one
+   studio's work instead of two unrelated builds. If you re-theme one for a
+   client, re-theme the other with the same values.
+   ============================================================================ */
+:root {
+  --color-primary: #C8102E;
+  --color-primary-dark: #8F0B20;
+  --color-accent: #C9A15A;
+  --color-background: #0B0B0C;
+  --color-surface: #131315;
+  --color-surface-muted: #1A1A1E;
+  --color-text-primary: #F3ECDD;
+  --color-text-muted: #9A9490;
+  --color-border: rgba(243, 236, 221, 0.12);
+
+  --font-display: 'Bodoni Moda', serif;
+  --font-body: 'Inter', sans-serif;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+/* Arabic pages — Bodoni Moda and Inter have no Arabic glyphs at all, so
+   without this every heading and body line on /ar/ pages would silently
+   fall back to the browser's generic system serif/sans, breaking the
+   display/body font pairing that's supposed to be a brand signature.
+   Noto Naskh Arabic goes first; the Latin fallbacks stay in the stack for
+   any digits/Latin text mixed into an Arabic page (prices, "MAD", etc). */
+html[lang='ar'] {
+  --font-display: 'Noto Naskh Arabic', 'Bodoni Moda', serif;
+  --font-body: 'Noto Naskh Arabic', 'Inter', sans-serif;
+}
+
+body {
+  background-color: var(--color-background);
+  color: var(--color-text-primary);
+  font-family: var(--font-body);
+}
+
+.font-display {
+  font-family: var(--font-display);
+}
+
+/* Same inline-SVG film-grain noise as the order engine's PaperTexture /
+   ParallaxHero — no image asset, works for every client, and it's the exact
+   same texture so the two sites don't have two similar-but-different grains. */
+.grain-overlay {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0.035;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+}
+
+.scrollbar-none::-webkit-scrollbar { display: none; }
+.scrollbar-none { -ms-overflow-style: none; scrollbar-width: none; }
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-in { animation: fadeIn 0.4s ease-out both; }
+
+/* ============================================================================
+   Scroll-reveal + hover depth — sitewide motion system.
+   Before this, every page was 100% static: no scroll animation, flat cards,
+   zero image motion anywhere except the header. That reads as "strak maar
+   saai" (sleek but boring) fast, especially on text-heavy pages like Menu
+   and À propos. This is the fix: a tiny vanilla IntersectionObserver (see
+   the script in Layout.astro) adds `.is-visible` to any `[data-reveal]`
+   element the moment it scrolls into view; the CSS here just defines the
+   before/after state. No framework, no bundle cost — same philosophy as the
+   header's scroll script.
+   ============================================================================ */
+/* NOTE: this exact transition list is duplicated verbatim on .card-lift
+   below. Elements often carry BOTH [data-reveal] and .card-lift — two
+   separate `transition` shorthand rules on the same element don't merge,
+   the later one in source order wins outright and silently drops the
+   other's properties. Keeping both lists identical sidesteps that instead
+   of relying on rule order. If you add a new transitioned property to
+   either, add it to both. */
+[data-reveal] {
+  opacity: 0;
+  transform: translateY(18px);
+  transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1), transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.25s ease, box-shadow 0.25s ease;
+}
+[data-reveal].is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-reveal] { opacity: 1; transform: none; transition: none; }
+}
+
+/* Card lift: applied to the repeating "boxed" cards across the site (menu
+   items, testimonials, stat tiles, highlight cards) so hovering one gives a
+   small, consistent sense of depth instead of a totally flat surface. */
+.card-lift {
+  transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1), transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.25s ease, box-shadow 0.25s ease;
+}
+.card-lift:hover {
+  transform: translateY(-3px);
+  border-color: color-mix(in srgb, var(--color-accent) 45%, var(--color-border));
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.35);
+}
+/* Touch devices never trigger :hover, so every .card-lift on the site was
+   completely static once its scroll-reveal finished — no feedback at all
+   when the majority of visitors (on a phone) actually tap a card. This
+   gives a small, real press-state instead of nothing. `(hover: none)`
+   keeps it out of the way of desktop's hover lift so the two don't fight. */
+@media (hover: none) {
+  .card-lift:active {
+    transform: scale(0.98);
+    border-color: color-mix(in srgb, var(--color-accent) 45%, var(--color-border));
+  }
+}
+
+/* Ken Burns — a continuous, very slow zoom on a full-bleed photo (the
+   signature-dish spotlight on Home). No video asset available, so this is
+   what "cinematic" looks like with a single static photo: 18s, ease, loops
+   forever, small enough amplitude (1 → 1.12) that it reads as deliberate
+   motion design rather than an obvious loop. */
+.ken-burns img {
+  animation: kenBurns 18s ease-in-out infinite alternate;
+}
+@keyframes kenBurns {
+  from { transform: scale(1); }
+  to { transform: scale(1.12); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ken-burns img { animation: none; }
+}
+
+/* Photo zoom: the img inside gets a slow, subtle scale on hover of its
+   containing `.photo-frame` — used on the gallery grid and category photo
+   banners so images feel alive instead of static tiles. */
+.photo-frame { overflow: hidden; }
+.photo-frame img {
+  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.photo-frame:hover img {
+  transform: scale(1.06);
+}
+
+/* Photo variant of [data-reveal]: scales in from slightly small + faded
+   instead of rising from below — used on images so a grid of photos and
+   text doesn't move in perfect unison (part of fixing "every element does
+   the exact same fade" flatness). */
+[data-reveal='scale'] {
+  transform: scale(0.94);
+}
+[data-reveal='scale'].is-visible {
+  transform: scale(1);
+}
+
+/* Oversized, unboxed stat/number moments — used on À propos in place of
+   the old boxed tiles, and anywhere else a single number needs to carry
+   real typographic weight instead of sitting in a small card. */
+.stat-huge {
+  font-family: var(--font-display);
+  font-weight: 600;
+  line-height: 1;
+  font-size: clamp(2.75rem, 6vw, 4.5rem);
+  color: var(--color-accent);
+}
+
+/* Unboxed pull-quote — a single testimonial or line of copy set large and
+   loose, no card/border/background, so it reads as an editorial moment
+   rather than another grey box in a grid of identical grey boxes. */
+.pull-quote {
+  font-family: var(--font-display);
+  font-weight: 500;
+  line-height: 1.25;
+  font-size: clamp(1.5rem, 3.4vw, 2.75rem);
+  color: var(--color-text-primary);
+}
+
+/* Large faded background wordmark — a big, low-opacity copy of the gold
+   emblem sitting behind a section's text. Real weight without competing
+   with the foreground content for attention. */
+.mark-watermark {
+  position: absolute;
+  opacity: 0.08;
+  pointer-events: none;
+  filter: grayscale(0.2);
+}
+
+/* Ambient section glow — a soft, blurred color blob sitting behind a
+   section so the transition between two flat-color sections isn't a hard
+   rectangular cut. Positioned per-use via inline style (top/left/etc);
+   this class only sets the shared look. Pick primary (red) or accent
+   (gold) per section so the unused brand red actually shows up somewhere
+   besides the logo. */
+.section-glow {
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(90px);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Left-accent pull-quote variant — a thin red rule instead of the bare
+   gold quotation mark, used where a second review/quote appears on the
+   same page as the primary pull-quote so they don't feel identical. */
+.pull-quote-accent {
+  border-left: 3px solid var(--color-primary);
+  padding-left: 1.25rem;
+}
+
+/* ============================================================================
+   Section rhythm — before this, every section on every page sat on the
+   exact same #0B0B0C body background: hero photo aside, the whole site
+   scrolled as one uninterrupted black rectangle. This is the fix: wrap a
+   full-bleed section in `.section-tint` to lift it one step to
+   --color-surface, and alternate it with plain sections down a page so
+   scrolling gets a visual cadence instead of "more of the same black".
+   Used deliberately sparingly — not every section — so it still reads as
+   intentional pacing rather than stripes.
+   ============================================================================ */
+.section-tint {
+  background-color: var(--color-surface);
+}
+
+/* Warm variant — pulls the deep wine-red from the order-engine's palette
+   (--color-primary-dark) into the marketing site instead of leaving
+   --color-primary parked at a 5% glow doing almost nothing. Mixed to 22%
+   against the background so it reads as "warm dark", not a red block —
+   same restraint as the rest of the site's motion-over-paint approach.
+   Swap in for `.section-tint` on food-forward sections (Menu, the
+   testimonial carousel) where the warmth actually fits; keep the neutral
+   `.section-tint` on editorial pages (À propos, Avis) so it stays a
+   deliberate accent, not a site-wide re-theme. Both read off the same
+   config-driven --color-primary-dark, so a future client swap in
+   site.config.ts's colors.primary changes this too, automatically. */
+.section-tint-warm {
+  background-color: color-mix(in srgb, var(--color-primary-dark) 22%, var(--color-background));
+}
+
+/* Menu item micro-interaction — a thin gold rule draws in under the dish
+   name on hover/focus of its card, and the price gives a small nudge.
+   Nothing fancy, but it's the difference between a menu that reads as a
+   static list and one that feels responsive when you touch it. */
+.menu-item-name {
+  position: relative;
+  display: inline-block;
+}
+.menu-item-name::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: -3px;
+  width: 0;
+  height: 1px;
+  background-color: var(--color-accent);
+  transition: width 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.card-lift:hover .menu-item-name::after,
+.card-lift:focus-within .menu-item-name::after {
+  width: 100%;
+}
+.menu-item-price {
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), color 0.3s ease;
+}
+.card-lift:hover .menu-item-price,
+.card-lift:focus-within .menu-item-price {
+  transform: translateX(-3px);
+}
+@media (prefers-reduced-motion: reduce) {
+  .menu-item-name::after { transition: none; }
+  .menu-item-price { transition: none; }
+}
+
+/* RTL: the underline should draw from the reading-start edge (the right,
+   in Arabic), not stay pinned to the left like the LTR pages. */
+[dir='rtl'] .menu-item-name::after {
+  left: auto;
+  right: 0;
+}
+
+/* ============================================================================
+   Keyboard focus — every interactive element on this site (buttons, cards,
+   links, the header nav) only had a :hover state before this. A keyboard or
+   screen-reader user tabbing through the page got zero visual feedback on
+   where they were. `:focus-visible` (not plain `:focus`) so mouse clicks
+   don't show the ring, only actual keyboard/assistive navigation does.
+   ============================================================================ */
+a:focus-visible,
+button:focus-visible,
+[tabindex]:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 3px;
+  border-radius: 4px;
+}

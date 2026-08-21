@@ -1,0 +1,146 @@
+---
+// See HomeContent.astro's top comment for the shared-body-per-route
+// pattern this and every other src/content-pages/*.astro file follows.
+import Layout from '../layouts/Layout.astro';
+import Button from '../components/Button.astro';
+import PageHero from '../components/PageHero.astro';
+import { siteConfig } from '../config/site.config';
+import { getOrderCtaLabel } from '../lib/nav';
+import { t, localizedPath, type Language } from '../i18n/languages';
+import { common, place } from '../i18n/ui';
+
+interface Props {
+  lang?: Language;
+}
+const { lang = 'fr' } = Astro.props;
+
+const { name } = siteConfig.identity;
+const primaryKeyword = t(siteConfig.identity.primaryKeyword, lang);
+const city = t(place.city, lang);
+const orderCtaLabel = getOrderCtaLabel(lang);
+const openingHours = t(siteConfig.contact.openingHours, lang);
+
+const copy = {
+  metaTitle: { fr: `Contact & horaires — ${primaryKeyword} à ${city} | ${name}`, en: `Contact & opening hours — ${primaryKeyword} in ${city} | ${name}`, ar: `اتصل بنا وساعات العمل — ${primaryKeyword} في ${city} | ${name}` },
+  metaDescription: {
+    fr: `Adresse, téléphone et horaires de ${name}, ${primaryKeyword} à ${city}. ${siteConfig.contact.address}.`,
+    en: `Address, phone and opening hours of ${name}, ${primaryKeyword} in ${city}. ${siteConfig.contact.address}.`,
+    ar: `العنوان والهاتف وساعات العمل لـ${name}, ${primaryKeyword} في ${city}. ${siteConfig.contact.address}.`,
+  },
+  heroTitle: { fr: 'Contact & horaires', en: 'Contact & opening hours', ar: 'اتصل بنا وساعات العمل' },
+  heroAlt: { fr: `Intérieur du ${primaryKeyword} ${name}`, en: `Interior of ${name}, ${primaryKeyword}`, ar: `داخل ${name}, ${primaryKeyword}` },
+  // Split into two shorter lines instead of one run-on sentence forcing two
+  // unrelated ideas together (a question + a neighborhood/signage cue) —
+  // the question stays the bold pull-quote moment, the recognition detail
+  // moves to its own quieter line underneath.
+  quoteQuestion: { fr: 'Une question, une envie de curry ce soir ?', en: 'A question, or a craving for curry tonight?', ar: 'لديك سؤال، أم ترغب في طبق كاري هذا المساء؟' },
+  quoteLocation: {
+    fr: 'Vous nous trouverez dans le quartier Agdal, repérables à notre enseigne dorée.',
+    en: "You'll find us in the Agdal neighborhood, easy to spot by our gold signage.",
+    ar: 'ستجدوننا في حي أكدال، يسهل التعرف علينا بلافتتنا الذهبية.',
+  },
+  itineraire: common.itineraire,
+} satisfies Record<string, { fr: string; en: string; ar: string }>;
+
+// Same small-icon language used everywhere else on the site by now (Home's
+// "why us", the À propos stats, the FAQ categories) — Contact was the one
+// info block left as three identical label-over-value stacks with nothing
+// to anchor the eye.
+//
+// WhatsApp added as its own row — siteConfig.contact.whatsappNumber existed
+// but was never actually rendered anywhere on this page. For a lot of
+// visitors here, a quick WhatsApp message is the real first move, more
+// than calling — the data was already there, just unused.
+const infoItems = [
+  { label: t(common.adresse, lang), value: siteConfig.contact.address, href: undefined, icon: 'M12 21s7-7.58 7-12A7 7 0 105 9c0 4.42 7 12 7 12z M12 11a2 2 0 100-4 2 2 0 000 4z' },
+  { label: t(common.telephone, lang), value: siteConfig.contact.phoneDisplay, href: siteConfig.contact.phoneHref, icon: 'M4 4h4l2 5-2.5 1.5a11 11 0 005 5L14 13l5 2v4a2 2 0 01-2 2A15 15 0 014 6a2 2 0 012-2z' },
+  {
+    label: t(common.whatsapp, lang),
+    value: siteConfig.contact.phoneDisplay,
+    href: `https://wa.me/${siteConfig.contact.whatsappNumber}`,
+    icon: 'M3 21l1.4-4.2A8 8 0 1110 19.6L3 21z M8 10c0 3 3 6 6 6',
+  },
+  { label: t(common.horaires, lang), value: openingHours, href: undefined, icon: 'M12 7v5l3 3 M21 12a9 9 0 11-18 0 9 9 0 0118 0z' },
+];
+
+const path = localizedPath('/contact', lang);
+---
+<Layout
+  title={t(copy.metaTitle, lang)}
+  description={t(copy.metaDescription, lang)}
+  path={path}
+  lang={lang}
+>
+  <!-- This is the "how do I find you" page — it was opening with a plate of
+       curry instead of the actual building, which is backwards for a page
+       whose whole job is wayfinding. Interior shot instead (reused from
+       À propos; the honest limit here is a handful of real photos, and
+       reuse across pages beats a food photo that doesn't help anyone
+       recognize the place). -->
+  <PageHero kicker={city} title={t(copy.heroTitle, lang)} image="/images/interior-1.jpg" alt={t(copy.heroAlt, lang)} />
+
+  <!-- Pull-quote no longer repeats the opening hours verbatim — the info
+       list three lines down already states them exactly. Redundant text
+       isn't the same as visual rhythm; this now adds a real, verifiable
+       recognition cue instead (the neighborhood name and the storefront's
+       actual gold signage — both visible in the client's own photography,
+       not invented local color) — as its own quieter line, not forced into
+       the same sentence as the opening question. -->
+  <section class="max-w-5xl mx-auto px-5 sm:px-8 pt-12 sm:pt-16 pb-6" data-reveal>
+    <p class="pull-quote max-w-2xl">{t(copy.quoteQuestion, lang)}</p>
+    <p class="mt-3 max-w-xl text-sm sm:text-base" style="color: var(--color-text-muted)">{t(copy.quoteLocation, lang)}</p>
+  </section>
+
+  <section class="max-w-5xl mx-auto px-5 sm:px-8 pt-4 pb-20 grid sm:grid-cols-2 gap-12 items-start">
+    <div>
+      <div class="space-y-5 text-sm sm:text-base" style="color: var(--color-text-primary)">
+        {infoItems.map((item, i) => (
+          <div class="flex items-start gap-3" data-reveal style={`transition-delay: ${i * 80}ms`}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke-width="1.6" class="shrink-0 mt-0.5" style="color: var(--color-accent)">
+              <path d={item.icon} stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+            <div>
+              <p class="font-bold text-xs uppercase tracking-wide" style="color: var(--color-text-muted)">{item.label}</p>
+              {item.href ? (
+                <a href={item.href} class="mt-1 inline-block hover:underline">{item.value}</a>
+              ) : (
+                <p class="mt-1">{item.value}</p>
+              )}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div class="mt-8 flex flex-wrap gap-3">
+        <Button href={orderCtaLabel.href} external variant="cta">{orderCtaLabel.label}</Button>
+        {siteConfig.contact.mapsUrl && (
+          <Button href={siteConfig.contact.mapsUrl} external variant="filled">{t(copy.itineraire, lang)}</Button>
+        )}
+      </div>
+    </div>
+
+    <!-- Warm-tinted instead of the plain neutral surface every other card
+         on the site used to have — same color-mix token as the section
+         bands, so the map doesn't sit as an isolated grey block next to
+         text that's now part of the site's warmer rhythm. -->
+    <!-- Fixed aspect ratio instead of `sm:aspect-auto` stretching to match
+         the row height — with `items-start` on the grid above and a short
+         text column, that used to pull the map into an oversized, lopsided
+         block instead of a card the same visual weight as the text next to
+         it. -->
+    <div
+      class="rounded-2xl overflow-hidden aspect-[4/3]"
+      style="background-color: color-mix(in srgb, var(--color-primary-dark) 10%, var(--color-surface)); border: 1px solid var(--color-border)"
+      data-reveal
+    >
+      <iframe
+        src={`https://www.google.com/maps?q=${encodeURIComponent(siteConfig.contact.address)}&output=embed`}
+        class="w-full h-full grayscale-[35%] contrast-[1.05]"
+        style="border: 0; min-height: 260px;"
+        loading="lazy"
+        referrerpolicy="no-referrer-when-downgrade"
+        title={`${name}, ${siteConfig.contact.address}`}
+      ></iframe>
+    </div>
+  </section>
+</Layout>

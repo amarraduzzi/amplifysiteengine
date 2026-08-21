@@ -1,0 +1,184 @@
+---
+// Same header behavior as the order-landing-page engine's Header.tsx v3:
+// fully transparent at the top of the page (sits directly on the hero
+// photo, no bar), gains a blurred surface + border the moment you scroll,
+// plus a thin gold scroll-progress hairline. No React/framer-motion here —
+// it's a ~20-line vanilla script instead, since this is a static multi-page
+// site and shipping a JS framework runtime just for this would undercut the
+// entire reason this project is Astro (fast, crawlable, no hydration tax).
+//
+// Departure from the order-engine convention: that engine deliberately
+// never uses a client logo file (quality varies too much client to client).
+// For Indian Flavors specifically, the client's actual gold emblem (cropped
+// from their real storefront photography, not a vector supplied by them) is
+// strong enough to be worth the exception — a real mark reads as more
+// "wow" than typography alone. If a future client's logo photography isn't
+// this clean, fall back to the typographic-only header.
+import { siteConfig } from '../config/site.config';
+import { getOrderCtaLabel } from '../lib/nav';
+import { LANGUAGES, LANGUAGE_LABEL, LANGUAGE_NATIVE_NAME, localizedPath, arrow, t, type Language } from '../i18n/languages';
+import { nav as navUi } from '../i18n/ui';
+
+interface Props {
+  lang?: Language;
+}
+const { lang = 'fr' } = Astro.props;
+const orderCtaLabel = getOrderCtaLabel(lang);
+
+const nav = [
+  { href: '/', label: t(navUi.accueil, lang) },
+  { href: '/menu', label: t(navUi.menu, lang) },
+  { href: '/a-propos', label: t(navUi.aPropos, lang) },
+  { href: '/avis', label: t(navUi.avis, lang) },
+  { href: '/faq', label: t(navUi.faq, lang) },
+  { href: '/contact', label: t(navUi.contact, lang) },
+].map((item) => ({ ...item, href: localizedPath(item.href, lang) }));
+
+// Current path with the OTHER languages' equivalent URLs, for the
+// switcher — same page, different language, never the homepage of that
+// language regardless of where you currently are on the site.
+const currentPath = Astro.url.pathname;
+const langLinks = LANGUAGES.map((l) => ({ lang: l, href: localizedPath(currentPath, l) }));
+---
+<header id="site-header" class="sticky top-0 z-40 transition-all duration-300" data-scrolled="false">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 h-16 sm:h-20 flex items-center justify-between gap-4">
+    <a href={localizedPath('/', lang)} class="flex items-center gap-2 min-w-0 shrink">
+      <img src="/images/logo-mark.png" alt="" width="36" height="36" class="w-8 h-8 sm:w-9 sm:h-9 shrink-0 rounded-full" />
+      <span class="font-display font-semibold text-base sm:text-lg truncate" style="color: var(--color-text-primary)">
+        {siteConfig.identity.name}
+      </span>
+    </a>
+
+    <nav class="hidden md:flex items-center gap-7 shrink-0">
+      {nav.map((item) => (
+        <a
+          href={item.href}
+          class="text-sm font-semibold transition-colors"
+          style={`color: ${currentPath === item.href ? 'var(--color-accent)' : 'var(--color-text-primary)'}`}
+        >
+          {item.label}
+        </a>
+      ))}
+    </nav>
+
+    <!-- Language switcher — real links to the same page's other-language
+         URL (see langLinks above), not a JS toggle: each is an actual
+         separately-crawlable static page (see astro.config.mjs's i18n
+         comment for why that matters here). -->
+    <div class="hidden sm:flex items-center gap-1 shrink-0 rounded-full p-0.5" style="border: 1px solid var(--color-border)">
+      {langLinks.map((l) => (
+        <a
+          href={l.href}
+          aria-label={LANGUAGE_NATIVE_NAME[l.lang]}
+          aria-current={lang === l.lang ? 'true' : undefined}
+          class="px-2 py-1 rounded-full text-xs font-bold transition-colors"
+          style={`color: ${lang === l.lang ? 'var(--color-background)' : 'var(--color-text-muted)'}; background-color: ${lang === l.lang ? 'var(--color-accent)' : 'transparent'}`}
+        >
+          {LANGUAGE_LABEL[l.lang]}
+        </a>
+      ))}
+    </div>
+
+    <a
+      href={orderCtaLabel.href}
+      target="_blank"
+      rel="noreferrer"
+      class="hidden sm:inline-flex items-center gap-1.5 text-sm font-bold shrink-0"
+      style="color: var(--color-accent)"
+    >
+      {orderCtaLabel.label} {arrow(lang)}
+    </a>
+
+    <!-- Mobile nav toggle -->
+    <button id="mobile-nav-toggle" class="md:hidden shrink-0" aria-label="Menu" aria-expanded="false">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="color: var(--color-text-primary)">
+        <path d="M4 7h16M4 12h16M4 17h16" stroke-linecap="round" />
+      </svg>
+    </button>
+  </div>
+
+  <!-- Mobile nav panel -->
+  <div id="mobile-nav-panel" class="md:hidden hidden flex-col px-4 pb-4" style="background-color: var(--color-surface)">
+    {nav.map((item) => (
+      <a href={item.href} class="py-2.5 text-sm font-semibold" style="color: var(--color-text-primary)">
+        {item.label}
+      </a>
+    ))}
+    <div class="flex items-center gap-2 mt-3 pt-3" style="border-top: 1px solid var(--color-border)">
+      {langLinks.map((l) => (
+        <a
+          href={l.href}
+          aria-current={lang === l.lang ? 'true' : undefined}
+          class="px-3 py-1.5 rounded-full text-xs font-bold border"
+          style={`color: ${lang === l.lang ? 'var(--color-background)' : 'var(--color-text-muted)'}; background-color: ${lang === l.lang ? 'var(--color-accent)' : 'transparent'}; border-color: var(--color-border)`}
+        >
+          {LANGUAGE_LABEL[l.lang]}
+        </a>
+      ))}
+    </div>
+    <a
+      href={orderCtaLabel.href}
+      target="_blank"
+      rel="noreferrer"
+      class="mt-2 py-2.5 text-sm font-bold"
+      style="color: var(--color-accent)"
+    >
+      {orderCtaLabel.label} {arrow(lang)}
+    </a>
+  </div>
+
+  <div class="h-px w-full transition-colors duration-300" id="header-track">
+    <div id="header-progress" class="h-full" style="width: 0%; background-color: var(--color-accent)"></div>
+  </div>
+</header>
+
+<style>
+  #site-header {
+    background-color: transparent;
+    border-bottom: 1px solid transparent;
+  }
+  /* Scrolled state now carries a touch of the same wine-red used in the
+     section bands below (color-mix'd into --color-surface first, then
+     that result mixed toward transparent for the blur) instead of being
+     the one part of the site that stays neutral grey no matter what page
+     you're on. Still subtle — this is the header, restraint matters most
+     here — but it means the "opening" moment ties back to the brand. */
+  #site-header[data-scrolled='true'] {
+    background-color: color-mix(in srgb, color-mix(in srgb, var(--color-primary-dark) 10%, var(--color-surface)) 95%, transparent);
+    border-bottom-color: var(--color-border);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+  }
+  #header-track {
+    background-color: transparent;
+  }
+  #site-header[data-scrolled='true'] #header-track {
+    background-color: var(--color-border);
+  }
+  #mobile-nav-panel.open {
+    display: flex;
+  }
+</style>
+
+<script>
+  const header = document.getElementById('site-header');
+  const progress = document.getElementById('header-progress');
+  const toggle = document.getElementById('mobile-nav-toggle');
+  const panel = document.getElementById('mobile-nav-panel');
+
+  function onScroll() {
+    if (!header || !progress) return;
+    const scrolled = window.scrollY > 8;
+    header.dataset.scrolled = String(scrolled);
+    const max = document.documentElement.scrollHeight - window.innerHeight;
+    const pct = max > 0 ? Math.min(1, window.scrollY / max) : 0;
+    progress.style.width = `${pct * 100}%`;
+  }
+  onScroll();
+  window.addEventListener('scroll', onScroll, { passive: true });
+
+  toggle?.addEventListener('click', () => {
+    const isOpen = panel?.classList.toggle('open');
+    toggle.setAttribute('aria-expanded', String(Boolean(isOpen)));
+  });
+</script>

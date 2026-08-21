@@ -1,0 +1,119 @@
+---
+// See HomeContent.astro's top comment for the shared-body-per-route
+// pattern this and every other src/content-pages/*.astro file follows.
+import Layout from '../layouts/Layout.astro';
+import PageHero from '../components/PageHero.astro';
+import { siteConfig } from '../config/site.config';
+import { faqItems, faqCategoryLabels, type FaqItem } from '../content/faq';
+import { t, localizedPath, type Language } from '../i18n/languages';
+import { place } from '../i18n/ui';
+
+interface Props {
+  lang?: Language;
+}
+const { lang = 'fr' } = Astro.props;
+
+const { name } = siteConfig.identity;
+const primaryKeyword = t(siteConfig.identity.primaryKeyword, lang);
+const city = t(place.city, lang);
+
+// Grouped by category instead of one flat list of 7 unrelated questions —
+// same fix as the review grid: give the eye something to scan besides
+// "identical grey box after identical grey box".
+const categoryOrder: FaqItem['category'][] = ['pratique', 'menu', 'paiement'];
+const grouped = categoryOrder
+  .map((category) => ({ category, items: faqItems.filter((item) => item.category === category) }))
+  .filter((group) => group.items.length > 0);
+
+const categoryIcon: Record<FaqItem['category'], string> = {
+  pratique: 'M12 21s7-7.58 7-12A7 7 0 105 9c0 4.42 7 12 7 12z M12 11a2 2 0 100-4 2 2 0 000 4z',
+  menu: 'M9 12l2 2 4-4 M21 12a9 9 0 11-18 0 9 9 0 0118 0z',
+  paiement: 'M3 6h18v4H3z M3 10h18v8H3z M7 15h4',
+};
+
+// FAQPage JSON-LD — this is the block AI answer engines (ChatGPT, Google AI
+// Overviews, Perplexity) most directly lift answers/citations from. Built
+// straight off faqItems so the visible page and the structured data can
+// never drift out of sync with each other. Localized to the page's language.
+const faqJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: faqItems.map((item) => ({
+    '@type': 'Question',
+    name: t(item.question, lang),
+    acceptedAnswer: { '@type': 'Answer', text: t(item.answer, lang) },
+  })),
+};
+
+const copy = {
+  metaTitle: {
+    fr: `Questions fréquentes — ${primaryKeyword} à ${city} | ${name}`,
+    en: `Frequently asked questions — ${primaryKeyword} in ${city} | ${name}`,
+    ar: `الأسئلة الشائعة — ${primaryKeyword} في ${city} | ${name}`,
+  },
+  metaDescription: {
+    fr: `Horaires, livraison, réservations : les réponses aux questions les plus fréquentes sur ${name}, ${primaryKeyword} à ${city}.`,
+    en: `Opening hours, delivery, bookings: answers to the most frequently asked questions about ${name}, ${primaryKeyword} in ${city}.`,
+    ar: `ساعات العمل، التوصيل، الحجوزات: إجابات على الأسئلة الأكثر شيوعًا حول ${name}, ${primaryKeyword} في ${city}.`,
+  },
+  heroTitle: { fr: 'Questions fréquentes', en: 'Frequently asked questions', ar: 'الأسئلة الشائعة' },
+  heroSubtitle: {
+    fr: 'Horaires, livraison, réservations et paiement — les réponses aux questions qu\'on nous pose le plus.',
+    en: 'Opening hours, delivery, bookings and payment — answers to the questions we get asked most.',
+    ar: 'ساعات العمل، التوصيل، الحجوزات والدفع — إجابات على الأسئلة التي نتلقاها أكثر من غيرها.',
+  },
+  heroAlt: { fr: `Intérieur du ${primaryKeyword} ${name}`, en: `Interior of ${name}, ${primaryKeyword}`, ar: `داخل ${name}, ${primaryKeyword}` },
+} satisfies Record<string, { fr: string; en: string; ar: string }>;
+
+const path = localizedPath('/faq', lang);
+---
+<Layout
+  title={t(copy.metaTitle, lang)}
+  description={t(copy.metaDescription, lang)}
+  path={path}
+  lang={lang}
+  jsonLd={faqJsonLd}
+>
+  <!-- FAQ was the one interior page with no photo hero at all — every other
+       page opens the same way, so this was reading as an unfinished page
+       rather than a deliberately plain one. -->
+  <PageHero
+    kicker={city}
+    title={t(copy.heroTitle, lang)}
+    subtitle={t(copy.heroSubtitle, lang)}
+    image="/images/interior-1.jpg"
+    alt={t(copy.heroAlt, lang)}
+  />
+
+  {grouped.map((group, gi) => {
+    const warm = gi % 2 === 1;
+    return (
+      <div class={warm ? 'section-tint-warm' : ''}>
+        <section class="max-w-3xl mx-auto px-5 sm:px-8 py-10 sm:py-12">
+          <h2 class="flex items-center gap-2.5 text-xs font-bold uppercase tracking-[0.2em] mb-5" style="color: var(--color-accent)">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke-width="1.8">
+              <path d={categoryIcon[group.category]} stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+            {t(faqCategoryLabels[group.category], lang)}
+          </h2>
+          <div class="space-y-3">
+            {group.items.map((item, i) => (
+              <details
+                class="group rounded-xl px-5 py-4"
+                style={`background-color: ${warm ? 'color-mix(in srgb, var(--color-primary-dark) 12%, var(--color-surface))' : 'var(--color-surface)'}; border: 1px solid var(--color-border); transition-delay: ${i * 60}ms`}
+                open={gi === 0 && i === 0}
+                data-reveal
+              >
+                <summary class="cursor-pointer list-none flex items-center justify-between gap-4 font-display font-semibold" style="color: var(--color-text-primary)">
+                  {t(item.question, lang)}
+                  <span class="shrink-0 text-lg transition-transform group-open:rotate-45" style="color: var(--color-accent)">+</span>
+                </summary>
+                <p class="mt-3 text-sm leading-relaxed" style="color: var(--color-text-muted)">{t(item.answer, lang)}</p>
+              </details>
+            ))}
+          </div>
+        </section>
+      </div>
+    );
+  })}
+</Layout>

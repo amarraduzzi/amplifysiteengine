@@ -1,0 +1,59 @@
+---
+// Per-page SEO head partial. Every page passes its OWN title/description —
+// there is deliberately no site-wide default that pages silently inherit,
+// because that's exactly how duplicate/thin meta tags happen. `jsonLd` is
+// optional structured data (Restaurant, FAQPage, Review...) specific to
+// that page; pass an array to emit more than one block.
+import { siteConfig } from '../config/site.config';
+import { LANGUAGES, localizedPath, type Language } from '../i18n/languages';
+
+interface Props {
+  title: string; // must contain the primary keyword — see site.config.ts notes
+  description: string; // must ALSO contain the primary keyword
+  path: string; // e.g. '/menu' or '/en/menu' — used to build the canonical URL
+  lang?: Language;
+  ogImage?: string;
+  jsonLd?: object | object[];
+  noindex?: boolean; // reserved for future pages that shouldn't be indexed
+  // (thank-you pages, internal search results, ad landing pages) — see the
+  // standing note in site.config.ts. No page in this template needs it
+  // today; the flag exists so a future page can opt in without inventing
+  // a new pattern.
+}
+
+const { title, description, path, lang = 'fr', ogImage, jsonLd, noindex = false } = Astro.props;
+const canonical = new URL(path, siteConfig.identity.siteUrl).toString();
+const image = ogImage ? new URL(ogImage, siteConfig.identity.siteUrl).toString() : undefined;
+const jsonLdBlocks = jsonLd ? (Array.isArray(jsonLd) ? jsonLd : [jsonLd]) : [];
+const ogLocale: Record<Language, string> = { fr: 'fr_MA', en: 'en_US', ar: 'ar_MA' };
+
+// hreflang alternates — without these, Google treats the fr/en/ar versions
+// of a page as unrelated pages (or worse, near-duplicates) instead of
+// knowing they're translations of each other. x-default points at French
+// since that's the site's default/unprefixed locale (see astro.config.mjs).
+const alternates = LANGUAGES.map((l) => ({
+  lang: l,
+  href: new URL(localizedPath(path, l), siteConfig.identity.siteUrl).toString(),
+}));
+---
+<title>{title}</title>
+<meta name="description" content={description} />
+<link rel="canonical" href={canonical} />
+{alternates.map((alt) => <link rel="alternate" hreflang={alt.lang} href={alt.href} />)}
+<link rel="alternate" hreflang="x-default" href={new URL(localizedPath(path, 'fr'), siteConfig.identity.siteUrl).toString()} />
+{noindex && <meta name="robots" content="noindex, nofollow" />}
+
+<meta property="og:type" content="restaurant.restaurant" />
+<meta property="og:locale" content={ogLocale[lang]} />
+<meta property="og:title" content={title} />
+<meta property="og:description" content={description} />
+<meta property="og:url" content={canonical} />
+{image && <meta property="og:image" content={image} />}
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content={title} />
+<meta name="twitter:description" content={description} />
+{image && <meta name="twitter:image" content={image} />}
+
+{jsonLdBlocks.map((block) => (
+  <script type="application/ld+json" set:html={JSON.stringify(block)} />
+))}

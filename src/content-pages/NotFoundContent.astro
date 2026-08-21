@@ -1,0 +1,58 @@
+---
+// Branded 404 — without this, a broken/old link shows the hosting
+// provider's bare default error page, which is the first thing that can
+// break the "this looks premium" impression the rest of the site works for.
+//
+// See HomeContent.astro's top comment for the shared-body-per-route
+// pattern this and every other src/content-pages/*.astro file follows.
+import Layout from '../layouts/Layout.astro';
+import Button from '../components/Button.astro';
+import { siteConfig } from '../config/site.config';
+import { t, localizedPath, type Language } from '../i18n/languages';
+import { common } from '../i18n/ui';
+
+interface Props {
+  lang?: Language;
+}
+const { lang = 'fr' } = Astro.props;
+
+const { name } = siteConfig.identity;
+
+const copy = {
+  metaTitle: { fr: `Page introuvable — ${name}`, en: `Page not found — ${name}`, ar: `الصفحة غير موجودة — ${name}` },
+  metaDescription: {
+    fr: `Cette page n'existe pas ou plus sur le site de ${name}.`,
+    en: `This page no longer exists on ${name}'s site.`,
+    ar: `هذه الصفحة لم تعد موجودة على موقع ${name}.`,
+  },
+  heading: { fr: "Cette page n'existe pas", en: 'This page does not exist', ar: 'هذه الصفحة غير موجودة' },
+  body: {
+    fr: "Le lien que vous avez suivi est peut-être incorrect ou la page a été déplacée.",
+    en: 'The link you followed may be incorrect, or the page may have been moved.',
+    ar: 'قد يكون الرابط الذي اتبعتموه غير صحيح، أو تم نقل الصفحة.',
+  },
+} satisfies Record<string, { fr: string; en: string; ar: string }>;
+
+const path = localizedPath('/404', lang);
+---
+<Layout
+  title={t(copy.metaTitle, lang)}
+  description={t(copy.metaDescription, lang)}
+  path={path}
+  lang={lang}
+  noindex
+>
+  <section class="max-w-xl mx-auto px-5 sm:px-8 pt-32 sm:pt-44 pb-24 text-center">
+    <span class="font-display block text-7xl sm:text-8xl font-semibold mb-4" style="color: var(--color-accent)">404</span>
+    <h1 class="font-display text-2xl sm:text-3xl font-semibold mb-3" style="color: var(--color-text-primary)">
+      {t(copy.heading, lang)}
+    </h1>
+    <p class="text-sm sm:text-base mb-8" style="color: var(--color-text-muted)">
+      {t(copy.body, lang)}
+    </p>
+    <div class="flex flex-wrap justify-center gap-3">
+      <Button href={localizedPath('/', lang)} variant="outline">{t(common.retourAccueil, lang)}</Button>
+      <Button href={localizedPath('/menu', lang)} variant="filled">{t(common.voirLeMenu, lang)}</Button>
+    </div>
+  </section>
+</Layout>

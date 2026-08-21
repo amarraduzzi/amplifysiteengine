@@ -1,0 +1,166 @@
+---
+// See HomeContent.astro's top comment for the shared-body-per-route
+// pattern this and every other src/content-pages/*.astro file follows.
+import Layout from '../layouts/Layout.astro';
+import Button from '../components/Button.astro';
+import Ornament from '../components/Ornament.astro';
+import { siteConfig } from '../config/site.config';
+import { getOrderCtaLabel } from '../lib/nav';
+import { menuHighlights } from '../content/menu-highlights';
+import { t, localizedPath, type Language } from '../i18n/languages';
+import { common, place } from '../i18n/ui';
+
+interface Props {
+  lang?: Language;
+}
+const { lang = 'fr' } = Astro.props;
+
+const { name } = siteConfig.identity;
+const primaryKeyword = t(siteConfig.identity.primaryKeyword, lang);
+const city = t(place.city, lang);
+const orderCtaLabel = getOrderCtaLabel(lang);
+
+const copy = {
+  metaTitle: {
+    fr: `Menu — ${primaryKeyword} à ${city} | ${name}`,
+    en: `Menu — ${primaryKeyword} in ${city} | ${name}`,
+    ar: `القائمة — ${primaryKeyword} في ${city} | ${name}`,
+  },
+  metaDescription: {
+    fr: `Découvrez le menu complet de ${name}, ${primaryKeyword} à ${city} : entrées, plats tandoori, biryani et pains naan. Commandez en ligne ou sur place.`,
+    en: `Discover the full menu of ${name}, ${primaryKeyword} in ${city}: starters, tandoori dishes, biryani and naan bread. Order online or dine in.`,
+    ar: `اكتشف القائمة الكاملة لـ${name}, ${primaryKeyword} في ${city}: مقبلات، أطباق تندوري، برياني وخبز نان. اطلب أونلاين أو تناول الطعام في المطعم.`,
+  },
+  heroAlt: {
+    fr: `Plats du menu de ${name}`,
+    en: `Dishes from ${name}'s menu`,
+    ar: `أطباق من قائمة ${name}`,
+  },
+  heroTitle: { fr: `Le menu de notre ${primaryKeyword}`, en: `Our ${primaryKeyword}'s menu`, ar: `قائمة ${primaryKeyword} الخاص بنا` },
+  heroSubtitle: {
+    fr: 'Une sélection de nos plats signature. Le menu complet, avec toutes les options et suppléments, est disponible au moment de la commande.',
+    en: 'A selection of our signature dishes. The full menu, with all options and extras, is available at the time of ordering.',
+    ar: 'تشكيلة من أطباقنا المميزة. القائمة الكاملة، بجميع الخيارات والإضافات، متوفرة عند الطلب.',
+  },
+  readyToOrder: { fr: 'Prêt à commander ?', en: 'Ready to order?', ar: 'جاهز للطلب؟' },
+} satisfies Record<string, { fr: string; en: string; ar: string }>;
+
+const menuJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Menu',
+  name: `Menu — ${name}`,
+  hasMenuSection: menuHighlights.map((cat) => ({
+    '@type': 'MenuSection',
+    name: t(cat.label, lang),
+    hasMenuItem: cat.items.map((item) => ({
+      '@type': 'MenuItem',
+      name: item.name,
+      description: t(item.description, lang),
+      offers: { '@type': 'Offer', price: item.priceMAD, priceCurrency: 'MAD' },
+    })),
+  })),
+};
+
+const path = localizedPath('/menu', lang);
+---
+<Layout
+  title={t(copy.metaTitle, lang)}
+  description={t(copy.metaDescription, lang)}
+  path={path}
+  lang={lang}
+  jsonLd={menuJsonLd}
+>
+  <!-- Menu's own bolder opening moment — every interior page used the same
+       compact PageHero, which made the whole site feel like one page
+       repeated. Menu gets the exception: taller, with the same Ken Burns
+       drift as the Home spotlight, since this is the page people actually
+       linger on. Home stays the one full-height "big" hero — this is a
+       step up from PageHero, not a rival to Home. -->
+  <section class="relative min-h-[420px] sm:h-[64vh] flex items-end overflow-hidden" data-reveal="scale">
+    <div class="ken-burns absolute inset-0">
+      <img
+        src="/images/gallery-spread.jpg"
+        alt={t(copy.heroAlt, lang)}
+        class="absolute inset-0 w-full h-full object-cover"
+      />
+    </div>
+    <div class="absolute inset-0" style="background: linear-gradient(0deg, var(--color-background) 12%, rgba(11,11,12,0.4) 55%, rgba(11,11,12,0.6) 100%)"></div>
+    <div class="relative z-10 max-w-7xl mx-auto px-5 sm:px-8 pb-12 sm:pb-16 w-full">
+      <span class="block text-[10px] font-bold uppercase tracking-[0.25em] mb-3" style="color: var(--color-accent)">{city}</span>
+      <h1 class="font-display text-3xl sm:text-5xl lg:text-6xl font-semibold" style="color: var(--color-text-primary)">
+        {t(copy.heroTitle, lang)}
+      </h1>
+      <p class="mt-4 max-w-xl text-sm sm:text-base" style="color: var(--color-text-muted)">
+        {t(copy.heroSubtitle, lang)}
+      </p>
+    </div>
+  </section>
+
+  <section class="max-w-7xl mx-auto px-5 sm:px-8 pt-8 pb-4">
+    <div>
+      <Button href={orderCtaLabel.href} external variant="cta">{orderCtaLabel.label}</Button>
+    </div>
+  </section>
+
+  <!-- Typographic moment — same oversized-number language as À propos,
+       repeated here instead of only appearing on one page of the site. -->
+  <section class="max-w-7xl mx-auto px-5 sm:px-8 pt-4 pb-10 sm:pb-14 flex flex-col sm:flex-row sm:items-end gap-4 sm:gap-10" data-reveal>
+    <p class="stat-huge">100%</p>
+    <p class="max-w-sm text-sm sm:text-base sm:pb-1" style="color: var(--color-text-muted)">
+      {t(common.preparesCommandeLine, lang)}
+    </p>
+  </section>
+
+  <!-- Alternating band now goes warm (--color-primary-dark) instead of
+       plain grey — the deep wine tone from the order-engine, applied
+       here rather than À propos/Avis because it's food, and warmth fits
+       a menu the way it doesn't fit an editorial about-page. -->
+  {menuHighlights.map((category, i) => (
+    <div class={i % 2 === 1 ? 'section-tint-warm' : ''}>
+      <section class="max-w-7xl mx-auto px-5 sm:px-8 py-8 sm:py-10">
+        <div class={category.image ? 'grid sm:grid-cols-[minmax(0,15rem)_1fr] gap-6 sm:gap-8 items-start' : ''}>
+          {category.image && (
+            <div class="photo-frame rounded-2xl overflow-hidden aspect-[4/3] sm:aspect-square" data-reveal="scale">
+              <img src={category.image} alt={category.imageAlt ? t(category.imageAlt, lang) : t(category.label, lang)} class="w-full h-full object-cover" loading="lazy" />
+            </div>
+          )}
+          <div>
+            <h2
+              class="font-display text-2xl font-semibold mb-5 pb-3 flex items-baseline gap-3"
+              style="color: var(--color-text-primary); border-bottom: 1px solid var(--color-border)"
+            >
+              <span class="text-xs font-bold" style="color: var(--color-accent)">{String(i + 1).padStart(2, '0')}</span>
+              {t(category.label, lang)}
+            </h2>
+            <div class="grid sm:grid-cols-2 gap-4">
+              {category.items.map((item, j) => (
+                <div
+                  class="card-lift flex items-start gap-4 rounded-xl p-4"
+                  style={`background-color: ${i % 2 === 1 ? 'color-mix(in srgb, var(--color-primary-dark) 14%, var(--color-surface-muted))' : 'var(--color-surface)'}; border: 1px solid var(--color-border); transition-delay: ${j * 70}ms`}
+                  data-reveal
+                >
+                  {item.image && (
+                    <div class="photo-frame shrink-0 rounded-lg overflow-hidden w-16 h-16 sm:w-20 sm:h-20">
+                      <img src={item.image} alt={item.imageAlt ? t(item.imageAlt, lang) : item.name} class="w-full h-full object-cover" loading="lazy" />
+                    </div>
+                  )}
+                  <div class="min-w-0 flex-1">
+                    <h3 class="menu-item-name font-display font-semibold" style="color: var(--color-text-primary)">{item.name}</h3>
+                    <p class="text-sm mt-1" style="color: var(--color-text-muted)">{t(item.description, lang)}</p>
+                  </div>
+                  <span class="menu-item-price font-bold shrink-0" style="color: var(--color-accent)">{item.priceMAD} MAD</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  ))}
+
+  <Ornament />
+  <section class="max-w-7xl mx-auto px-5 sm:px-8 py-16 text-center">
+    <p class="text-sm mb-4" style="color: var(--color-text-muted)">{t(copy.readyToOrder, lang)}</p>
+    <Button href={orderCtaLabel.href} external variant="cta">{orderCtaLabel.label}</Button>
+  </section>
+</Layout>

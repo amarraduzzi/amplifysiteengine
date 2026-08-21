@@ -1,0 +1,363 @@
+---
+// Home page body — one shared template for all three languages. The
+// per-locale route files (src/pages/index.astro, src/pages/en/index.astro,
+// src/pages/ar/index.astro) are just `<HomeContent lang="..." />`; every
+// piece of markup, motion and structure lives here exactly once instead of
+// being copy-pasted three times, so a future design change only has to
+// happen in one place. See src/i18n/languages.ts + src/i18n/ui.ts for the
+// translation plumbing this relies on.
+import Layout from '../layouts/Layout.astro';
+import Button from '../components/Button.astro';
+import Ornament from '../components/Ornament.astro';
+import { siteConfig } from '../config/site.config';
+import { getOrderCtaLabel } from '../lib/nav';
+import { menuHighlights } from '../content/menu-highlights';
+import { testimonials, aggregateRating } from '../content/testimonials';
+import { t, arrow, localizedPath, type Language } from '../i18n/languages';
+import { common, place } from '../i18n/ui';
+
+interface Props {
+  lang?: Language;
+}
+const { lang = 'fr' } = Astro.props;
+
+const primaryKeyword = t(siteConfig.identity.primaryKeyword, lang);
+const city = t(place.city, lang);
+const country = t(place.country, lang);
+const orderCtaLabel = getOrderCtaLabel(lang);
+
+// Page-specific copy — kept next to the markup that uses it rather than in
+// the shared src/i18n/ui.ts, since none of this repeats on other pages.
+const copy = {
+  metaTitle: {
+    fr: `${siteConfig.identity.name} — ${primaryKeyword} à ${city}`,
+    en: `${siteConfig.identity.name} — ${primaryKeyword} in ${city}`,
+    ar: `${siteConfig.identity.name} — ${primaryKeyword} في ${city}`,
+  },
+  metaDescription: {
+    fr: `${siteConfig.identity.name} est un ${primaryKeyword} authentique à ${city}. Currys onctueux, grillades au tandoor traditionnel et pains naan cuits minute, à commander en ligne ou sur place.`,
+    en: `${siteConfig.identity.name} is an authentic ${primaryKeyword} in ${city}. Velvety curries, traditional tandoor-grilled meats and naan baked to order, for delivery or pickup.`,
+    ar: `${siteConfig.identity.name} هو ${primaryKeyword} أصيل في ${city}. أطباق كاري ناعمة، مشاوٍ تندور تقليدية، وخبز نان طازج، للطلب أونلاين أو في المطعم.`,
+  },
+  heroTitle: {
+    fr: `${siteConfig.identity.name} — ${primaryKeyword} authentique à ${city}`,
+    en: `${siteConfig.identity.name} — authentic ${primaryKeyword} in ${city}`,
+    ar: `${siteConfig.identity.name} — ${primaryKeyword} أصيل في ${city}`,
+  },
+  heroSubtitle: {
+    fr: 'Currys onctueux, grillades au tandoor traditionnel et pains naan cuits minute, au cœur de la ville.',
+    en: 'Velvety curries, traditional tandoor-grilled meats and naan baked to order, in the heart of the city.',
+    ar: 'أطباق كاري ناعمة، مشاوٍ تندور تقليدية، وخبز نان طازج، في قلب المدينة.',
+  },
+  selectionKicker: { fr: 'Sélection', en: 'Selection', ar: 'مختارات' },
+  incontournablesTitle: { fr: 'Nos incontournables', en: 'Customer favorites', ar: 'أطباقنا المميزة' },
+  platSignatureKicker: { fr: 'Plat signature', en: 'Signature dish', ar: 'الطبق المميز' },
+  platSignatureQuote: {
+    fr: "Un Hyderabadi Dum Biryani mijoté à l'étouffée, servi avec pani puri et naan tout juste sorti du tandoor.",
+    en: 'A Hyderabadi Dum Biryani slow-cooked to perfection, served with pani puri and naan straight from the tandoor.',
+    ar: 'برياني حيدر آبادي مطهو ببطء حتى الكمال، يُقدَّم مع باني بوري وخبز نان طازج من التندور.',
+  },
+  galleryAlt1: {
+    fr: `Plats de ${siteConfig.identity.name}, ${primaryKeyword} à ${city}`,
+    en: `Dishes from ${siteConfig.identity.name}, ${primaryKeyword} in ${city}`,
+    ar: `أطباق من ${siteConfig.identity.name}, ${primaryKeyword} في ${city}`,
+  },
+  galleryAlt2: {
+    fr: 'Naan fait maison, cuit au tandoor',
+    en: 'House-made naan, baked in the tandoor',
+    ar: 'خبز نان محضّر منزليًا، مخبوز في التندور',
+  },
+  galleryAlt3: {
+    fr: "Sélection d'entrées et de plats indiens",
+    en: 'A selection of Indian starters and dishes',
+    ar: 'تشكيلة من المقبلات والأطباق الهندية',
+  },
+  whyUs: [
+    {
+      title: { fr: 'Recettes authentiques', en: 'Authentic recipes', ar: 'وصفات أصيلة' },
+      body: {
+        fr: 'Épices importées, recettes transmises depuis trois générations, sans compromis sur le goût.',
+        en: 'Imported spices, recipes passed down for three generations, no compromise on flavor.',
+        ar: 'بهارات مستوردة، ووصفات متوارثة منذ ثلاثة أجيال، دون أي تنازل عن النكهة.',
+      },
+    },
+    {
+      title: { fr: 'Tandoor traditionnel', en: 'Traditional tandoor', ar: 'تندور تقليدي' },
+      body: {
+        fr: "Cuisson au four d'argile pour nos grillades et nos pains naan, cuits minute à la commande.",
+        en: 'Clay-oven cooking for our grilled meats and naan, made fresh to order.',
+        ar: 'طهي في فرن طيني لمشاوينا وخبز النان، يُحضّر طازجًا عند الطلب.',
+      },
+    },
+    {
+      title: { fr: 'Livraison rapide', en: 'Fast delivery', ar: 'توصيل سريع' },
+      body: {
+        fr: `Commande directement reliée à notre cuisine à ${city} — préparation immédiate.`,
+        en: `Orders go straight to our kitchen in ${city} — prepared right away.`,
+        ar: `الطلبات تصل مباشرة إلى مطبخنا في ${city} — تُحضَّر فورًا.`,
+      },
+    },
+  ],
+  reviewAriaLabel: { fr: 'Avis', en: 'Review', ar: 'تقييم' },
+} satisfies Record<string, { fr: string; en: string; ar: string } | { title: any; body: any }[]>;
+
+// Restaurant + LocalBusiness structured data — the single most important
+// JSON-LD block on the whole site, since Home is what Google/AI engines
+// most often use to resolve "what is this place, where is it, is it open".
+// Address/locality stay romanized (siteConfig.identity.city/country) across
+// all three language versions — mixing scripts here risks breaking
+// schema.org and Google Maps matching, which matters more than the display
+// language of the address field.
+const restaurantJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Restaurant',
+  name: siteConfig.identity.name,
+  image: new URL('/images/hero-home.jpg', siteConfig.identity.siteUrl).toString(),
+  '@id': siteConfig.identity.siteUrl,
+  url: siteConfig.identity.siteUrl,
+  telephone: siteConfig.contact.phoneDisplay,
+  address: {
+    '@type': 'PostalAddress',
+    streetAddress: siteConfig.contact.address,
+    addressLocality: siteConfig.identity.city,
+    addressCountry: siteConfig.identity.country,
+  },
+  servesCuisine: 'Indian',
+  priceRange: '€€',
+  aggregateRating: {
+    '@type': 'AggregateRating',
+    ratingValue: aggregateRating.ratingValue,
+    reviewCount: aggregateRating.reviewCount,
+  },
+};
+
+const highlightItems = menuHighlights.flatMap((c) => c.items).slice(0, 4);
+
+const ratingRounded = Math.round(Number(aggregateRating.ratingValue));
+const ratingStars = '★'.repeat(ratingRounded) + '☆'.repeat(5 - ratingRounded);
+
+const path = localizedPath('/', lang);
+---
+<Layout
+  title={t(copy.metaTitle, lang)}
+  description={t(copy.metaDescription, lang)}
+  path={path}
+  lang={lang}
+  ogImage="/images/hero-home.jpg"
+  jsonLd={restaurantJsonLd}
+>
+  <!-- Hero -->
+  <section class="relative min-h-[640px] sm:h-[92vh] flex items-end sm:items-center overflow-hidden">
+    <img src="/images/hero-home.jpg" alt={t(copy.metaDescription, lang)} class="absolute inset-0 w-full h-full object-cover" />
+    <div class="absolute inset-0" style="background: linear-gradient(0deg, var(--color-background) 15%, rgba(11,11,12,0.35) 55%, rgba(11,11,12,0.55) 100%)"></div>
+
+    <div class="relative z-10 max-w-7xl mx-auto px-5 sm:px-8 pb-16 sm:pb-0 w-full">
+      <div class="max-w-xl">
+        <span class="inline-block text-xs font-bold uppercase tracking-[0.3em] mb-4" style="color: var(--color-accent)">
+          {city} · {country}
+        </span>
+        <h1 class="font-display text-[2.4rem] leading-[1.05] sm:text-5xl lg:text-6xl font-semibold tracking-tight" style="color: var(--color-text-primary)">
+          {t(copy.heroTitle, lang)}
+        </h1>
+        <p class="mt-5 text-base sm:text-lg max-w-md" style="color: var(--color-text-muted)">
+          {t(copy.heroSubtitle, lang)}
+        </p>
+        <div class="mt-8 flex flex-wrap gap-3">
+          <Button href={orderCtaLabel.href} external variant="cta">{orderCtaLabel.label}</Button>
+          <Button href={localizedPath('/menu', lang)} variant="outline">{t(common.voirLeMenu, lang)}</Button>
+        </div>
+        <p class="mt-5 flex items-center gap-2 text-sm" style="color: var(--color-text-muted)">
+          <span style="color: var(--color-accent); letter-spacing: 1px">{ratingStars}</span>
+          {aggregateRating.ratingValue}/5 · {aggregateRating.reviewCount} {t(common.avisTripadvisorSuffix, lang)}
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Menu highlights -->
+  <section class="max-w-7xl mx-auto px-5 sm:px-8 py-16 sm:py-24">
+    <div class="flex items-baseline justify-between mb-8 pb-3" style="border-bottom: 1px solid var(--color-border)">
+      <div>
+        <span class="block text-[10px] font-bold uppercase tracking-[0.25em] mb-1" style="color: var(--color-accent)">{t(copy.selectionKicker, lang)}</span>
+        <h2 class="font-display text-2xl sm:text-3xl font-semibold" style="color: var(--color-text-primary)">{t(copy.incontournablesTitle, lang)}</h2>
+      </div>
+      <a href={localizedPath('/menu', lang)} class="text-sm font-bold" style="color: var(--color-accent)">{t(common.menuComplet, lang)} {arrow(lang)}</a>
+    </div>
+    <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      {highlightItems.map((item, i) => (
+        <div
+          class="card-lift rounded-2xl overflow-hidden"
+          style={`background-color: var(--color-surface); border: 1px solid var(--color-border); transition-delay: ${i * 80}ms`}
+          data-reveal
+        >
+          {item.image ? (
+            <div class="photo-frame aspect-square">
+              <img src={item.image} alt={item.imageAlt ? t(item.imageAlt, lang) : item.name} class="w-full h-full object-cover" loading="lazy" />
+            </div>
+          ) : (
+            <div class="pt-5 px-5">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" class="mb-1" style="color: var(--color-accent); opacity: 0.75">
+                <path d="M12 3c-1.5 3-4.5 4.5-4.5 8.5a4.5 4.5 0 009 0C16.5 7.5 13.5 6 12 3z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round" />
+              </svg>
+            </div>
+          )}
+          <div class="p-5">
+            <h3 class="menu-item-name font-display font-semibold text-lg" style="color: var(--color-text-primary)">{item.name}</h3>
+            <p class="text-sm mt-1.5 leading-relaxed" style="color: var(--color-text-muted)">{t(item.description, lang)}</p>
+            <p class="menu-item-price mt-3 font-bold" style="color: var(--color-accent)">{item.priceMAD} MAD</p>
+          </div>
+        </div>
+      ))}
+    </div>
+  </section>
+
+  <Ornament />
+
+  <!-- Signature spotlight -->
+  <section class="relative min-h-[480px] sm:h-[78vh] overflow-hidden" data-reveal="scale">
+    <div class="ken-burns absolute inset-0">
+      <img
+        src="/images/gallery-biryani.jpg"
+        alt={t(copy.platSignatureQuote, lang)}
+        class="absolute inset-0 w-full h-full object-cover"
+        loading="lazy"
+      />
+    </div>
+    <div class="absolute inset-0" style="background: linear-gradient(100deg, color-mix(in srgb, var(--color-primary-dark) 30%, var(--color-background)) 0%, color-mix(in srgb, var(--color-primary-dark) 16%, rgba(11,11,12,0.55)) 42%, rgba(11,11,12,0.15) 68%, transparent 100%)"></div>
+
+    <div class="relative z-10 h-full flex items-center max-w-7xl mx-auto px-5 sm:px-8">
+      <div class="max-w-md">
+        <span class="block text-[10px] font-bold uppercase tracking-[0.25em] mb-4" style="color: var(--color-accent)">{t(copy.platSignatureKicker, lang)}</span>
+        <p class="pull-quote">
+          {t(copy.platSignatureQuote, lang)}
+        </p>
+        <a href={localizedPath('/menu', lang)} class="inline-block mt-6 text-sm font-bold" style="color: var(--color-accent)">{t(common.voirLeMenuComplet, lang)} {arrow(lang)}</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Photo gallery -->
+  <div class="section-tint">
+    <section class="max-w-7xl mx-auto px-5 sm:px-8 py-16 sm:py-24">
+      <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4">
+        <div class="photo-frame rounded-2xl col-span-2 sm:col-span-1 aspect-square" data-reveal="scale">
+          <img src="/images/gallery-curries.jpg" alt={t(copy.galleryAlt1, lang)} class="w-full h-full object-cover" loading="lazy" />
+        </div>
+        <div class="photo-frame rounded-2xl aspect-square" data-reveal="scale" style="transition-delay: 100ms">
+          <img src="/images/gallery-naan.jpg" alt={t(copy.galleryAlt2, lang)} class="w-full h-full object-cover" loading="lazy" />
+        </div>
+        <div class="photo-frame rounded-2xl aspect-square" data-reveal="scale" style="transition-delay: 200ms">
+          <img src="/images/gallery-spread.jpg" alt={t(copy.galleryAlt3, lang)} class="w-full h-full object-cover" loading="lazy" />
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- Why us / E-E-A-T signals -->
+  <section class="max-w-7xl mx-auto px-5 sm:px-8 py-16 sm:py-24 grid sm:grid-cols-3 gap-8">
+    {copy.whyUs.map((f, i) => (
+      <div data-reveal style={`transition-delay: ${i * 100}ms`}>
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke-width="1.5" class="mb-4" style="color: var(--color-accent)">
+          <path
+            d={
+              i === 0
+                ? 'M12 2c-1 3-4 4-4 8a4 4 0 008 0c0-4-3-5-4-8zM6 20h12'
+                : i === 1
+                  ? 'M5 21V9a7 7 0 0114 0v12M5 21h14M9 21v-6h6v6'
+                  : 'M3 7h11v8H3zM14 10h4l3 3v2h-7zM6 19a2 2 0 100-4 2 2 0 000 4zM17 19a2 2 0 100-4 2 2 0 000 4z'
+            }
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+        </svg>
+        <h3 class="font-display text-xl font-semibold mb-2" style="color: var(--color-text-primary)">{t(f.title, lang)}</h3>
+        <p class="text-sm leading-relaxed" style="color: var(--color-text-muted)">{t(f.body, lang)}</p>
+      </div>
+    ))}
+  </section>
+
+  <!-- Testimonial carousel -->
+  <section class="section-tint-warm relative max-w-none px-0 py-16 sm:py-28 overflow-hidden" data-reveal>
+    <div class="section-glow" style="width: 380px; height: 380px; background: var(--color-accent); opacity: 0.14; right: -140px; bottom: -60px;"></div>
+
+    <div class="relative testimonial-carousel max-w-3xl mx-auto px-5 sm:px-8">
+      <div class="testimonial-track">
+        {testimonials.map((tItem, i) => (
+          <div class="testimonial-slide text-center" data-slide={i}>
+            <span
+              class="inline-flex items-center justify-center w-12 h-12 rounded-full font-display font-bold text-lg mb-5"
+              style="background: var(--color-surface); border: 1.5px solid var(--color-accent); color: var(--color-accent)"
+            >
+              {tItem.name.charAt(0)}
+            </span>
+            <p class="pull-quote">{t(tItem.text, lang)}</p>
+            <p class="mt-6 text-sm font-bold" style="color: var(--color-accent)">— {tItem.name}</p>
+          </div>
+        ))}
+      </div>
+
+      <div class="testimonial-dots flex items-center justify-center gap-2 mt-8">
+        {testimonials.map((_, i) => (
+          <button
+            type="button"
+            class="testimonial-dot w-2 h-2 rounded-full transition-all"
+            style="background-color: var(--color-border)"
+            data-dot={i}
+            aria-label={`${t(copy.reviewAriaLabel, lang)} ${i + 1}`}
+          ></button>
+        ))}
+      </div>
+
+      <p class="text-center mt-4">
+        <a href={localizedPath('/avis', lang)} class="text-sm font-bold" style="color: var(--color-accent)">{t(common.lireTousLesAvis, lang)} {arrow(lang)}</a>
+      </p>
+    </div>
+  </section>
+
+  <style>
+    .testimonial-track { position: relative; min-height: 220px; }
+    .testimonial-slide {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      transform: translateY(10px);
+      transition: opacity 0.5s ease, transform 0.5s ease;
+      pointer-events: none;
+    }
+    .testimonial-slide.is-active {
+      position: relative;
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
+    .testimonial-dot.is-active { background-color: var(--color-accent) !important; width: 22px; }
+  </style>
+
+  <script>
+    document.querySelectorAll<HTMLElement>('.testimonial-carousel').forEach((carousel) => {
+      const slides = Array.from(carousel.querySelectorAll<HTMLElement>('.testimonial-slide'));
+      const dots = Array.from(carousel.querySelectorAll<HTMLElement>('.testimonial-dot'));
+      let active = 0;
+      let timer: ReturnType<typeof setInterval>;
+
+      function show(index: number) {
+        active = (index + slides.length) % slides.length;
+        slides.forEach((s, i) => s.classList.toggle('is-active', i === active));
+        dots.forEach((d, i) => d.classList.toggle('is-active', i === active));
+      }
+      function start() {
+        timer = setInterval(() => show(active + 1), 6000);
+      }
+      dots.forEach((dot, i) => {
+        dot.addEventListener('click', () => {
+          show(i);
+          clearInterval(timer);
+          start();
+        });
+      });
+      show(0);
+      start();
+    });
+  </script>
+</Layout>
