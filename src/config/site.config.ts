@@ -78,6 +78,12 @@ export interface SiteConfig {
   };
   social: {
     googleReviewsUrl?: string;
+    // Real number from the client's Google Business Profile — NOT computed
+    // or guessed. Deliberately no googleReviewCount field: only the rating
+    // was confirmed, and showing a review count we didn't verify would be
+    // exactly the kind of fabricated-looking claim this site has avoided
+    // everywhere else (see testimonials.ts's standing note on this).
+    googleRating?: string;
   };
 }
 
@@ -121,7 +127,13 @@ export const siteConfig: SiteConfig = {
     orderSiteUrl: 'https://indianflavor.pages.dev',
   },
   social: {
-    googleReviewsUrl: '',
+    // Cleaned Google Maps place link (session/tracking params stripped —
+    // the raw link copied from a browser address bar carries `sca_esv`,
+    // `sxsrf`, `ved`, `g_ep` etc. that expire and shouldn't be published).
+    // Opens the real Google Business Profile listing, reviews tab included.
+    googleReviewsUrl:
+      'https://www.google.com/maps/place/Indian+Flavors/@33.9953923,-6.8492066,17z/data=!3m1!4b1!4m6!3m5!1s0xda76dcf6d28c81b:0x30698f416a8579b1!8m2!3d33.9953923!4d-6.8466317!16s%2Fg%2F11vct6q72j',
+    googleRating: '4.4',
   },
 };
 

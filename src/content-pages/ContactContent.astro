@@ -40,6 +40,7 @@ const copy = {
     ar: 'ستجدوننا في حي أكدال، يسهل التعرف علينا بلافتتنا الذهبية.',
   },
   itineraire: common.itineraire,
+  avisGoogle: common.avisGoogle,
 } satisfies Record<string, { fr: string; en: string; ar: string }>;
 
 // Same small-icon language used everywhere else on the site by now (Home's
@@ -115,6 +116,13 @@ const path = localizedPath('/contact', lang);
         <Button href={orderCtaLabel.href} external variant="cta">{orderCtaLabel.label}</Button>
         {siteConfig.contact.mapsUrl && (
           <Button href={siteConfig.contact.mapsUrl} external variant="filled">{t(copy.itineraire, lang)}</Button>
+        )}
+        <!-- Contact is the page someone lands on right after a good visit
+             to double-check the address/hours — exactly the moment a
+             "leave a review" nudge actually converts, more than a passive
+             mention buried in the footer. -->
+        {siteConfig.social.googleReviewsUrl && (
+          <Button href={siteConfig.social.googleReviewsUrl} external variant="outline">{t(copy.avisGoogle, lang)}</Button>
         )}
       </div>
     </div>

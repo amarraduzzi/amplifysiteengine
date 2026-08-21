@@ -64,14 +64,19 @@ const langLinks = LANGUAGES.map((l) => ({ lang: l, href: localizedPath(currentPa
     <!-- Language switcher — real links to the same page's other-language
          URL (see langLinks above), not a JS toggle: each is an actual
          separately-crawlable static page (see astro.config.mjs's i18n
-         comment for why that matters here). -->
-    <div class="hidden sm:flex items-center gap-1 shrink-0 rounded-full p-0.5" style="border: 1px solid var(--color-border)">
+         comment for why that matters here). Always visible in the header
+         itself, including on mobile — not tucked away inside the hamburger
+         panel only, since picking a language is a first-glance decision,
+         not a secondary nav item. Stays compact enough (2-letter codes,
+         tight padding) to sit next to the logo and the mobile menu toggle
+         without crowding either. -->
+    <div class="flex items-center gap-0.5 sm:gap-1 shrink-0 rounded-full p-0.5" style="border: 1px solid var(--color-border)">
       {langLinks.map((l) => (
         <a
           href={l.href}
           aria-label={LANGUAGE_NATIVE_NAME[l.lang]}
           aria-current={lang === l.lang ? 'true' : undefined}
-          class="px-2 py-1 rounded-full text-xs font-bold transition-colors"
+          class="px-1.5 sm:px-2 py-1 rounded-full text-[11px] sm:text-xs font-bold transition-colors"
           style={`color: ${lang === l.lang ? 'var(--color-background)' : 'var(--color-text-muted)'}; background-color: ${lang === l.lang ? 'var(--color-accent)' : 'transparent'}`}
         >
           {LANGUAGE_LABEL[l.lang]}
@@ -104,24 +109,15 @@ const langLinks = LANGUAGES.map((l) => ({ lang: l, href: localizedPath(currentPa
         {item.label}
       </a>
     ))}
-    <div class="flex items-center gap-2 mt-3 pt-3" style="border-top: 1px solid var(--color-border)">
-      {langLinks.map((l) => (
-        <a
-          href={l.href}
-          aria-current={lang === l.lang ? 'true' : undefined}
-          class="px-3 py-1.5 rounded-full text-xs font-bold border"
-          style={`color: ${lang === l.lang ? 'var(--color-background)' : 'var(--color-text-muted)'}; background-color: ${lang === l.lang ? 'var(--color-accent)' : 'transparent'}; border-color: var(--color-border)`}
-        >
-          {LANGUAGE_LABEL[l.lang]}
-        </a>
-      ))}
-    </div>
+    <!-- Language pills are no longer repeated here — they're always visible
+         in the header bar itself now (see above), including on mobile, so
+         duplicating them inside this panel would just be clutter. -->
     <a
       href={orderCtaLabel.href}
       target="_blank"
       rel="noreferrer"
-      class="mt-2 py-2.5 text-sm font-bold"
-      style="color: var(--color-accent)"
+      class="mt-3 pt-3 py-2.5 text-sm font-bold"
+      style="border-top: 1px solid var(--color-border); color: var(--color-accent)"
     >
       {orderCtaLabel.label} {arrow(lang)}
     </a>

@@ -2,7 +2,7 @@
 import { siteConfig } from '../config/site.config';
 import { getOrderCtaLabel } from '../lib/nav';
 import { aggregateRating } from '../content/testimonials';
-import { localizedPath, t, type Language } from '../i18n/languages';
+import { localizedPath, t, arrow, type Language } from '../i18n/languages';
 import { nav as navUi, common, footer as footerUi } from '../i18n/ui';
 import Button from './Button.astro';
 
@@ -27,6 +27,9 @@ const nav = [
 
 const ratingRounded = Math.round(Number(aggregateRating.ratingValue));
 const ratingStars = '★'.repeat(ratingRounded) + '☆'.repeat(5 - ratingRounded);
+
+const googleRatingRounded = siteConfig.social.googleRating ? Math.round(Number(siteConfig.social.googleRating)) : 0;
+const googleRatingStars = '★'.repeat(googleRatingRounded) + '☆'.repeat(5 - googleRatingRounded);
 ---
 <footer class="relative overflow-hidden" style="background-color: var(--color-surface); border-top: 1px solid var(--color-border)">
   <!-- The footer used to be flat #131315 with a thin top border — the one
@@ -66,6 +69,30 @@ const ratingStars = '★'.repeat(ratingRounded) + '☆'.repeat(5 - ratingRounded
         <span style="letter-spacing: 1px">{ratingStars}</span>
         {aggregateRating.ratingValue}/5 · {aggregateRating.reviewCount} {t(common.avisTripadvisorSuffix, lang)}
       </p>
+      <!-- Google Business Profile was the one review channel with zero
+           presence anywhere on the site — the single highest-leverage
+           local-SEO lever per the standing note at the bottom of
+           site.config.ts, and yet nothing pointed there. The rating shown
+           is the real, confirmed Google figure (4.4) — no review count
+           though, since that number was never verified with the client and
+           this site doesn't fabricate figures (see testimonials.ts). -->
+      {siteConfig.social.googleReviewsUrl && (
+        <a
+          href={siteConfig.social.googleReviewsUrl}
+          target="_blank"
+          rel="noreferrer"
+          class="mt-1.5 flex items-center gap-1.5 text-xs font-bold hover:underline"
+          style="color: var(--color-text-muted)"
+        >
+          {siteConfig.social.googleRating && (
+            <>
+              <span style="letter-spacing: 1px; color: var(--color-accent)">{googleRatingStars}</span>
+              {siteConfig.social.googleRating}/5 {t(common.surGoogle, lang)} ·
+            </>
+          )}
+          {t(common.laisserAvisGoogle, lang)} {arrow(lang)}
+        </a>
+      )}
       <div class="mt-5 flex flex-wrap items-center gap-3">
         <Button href={orderCtaLabel.href} external>{orderCtaLabel.label}</Button>
         {siteConfig.contact.instagramUrl && (

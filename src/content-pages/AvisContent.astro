@@ -45,6 +45,7 @@ const reviewsJsonLd = {
 };
 
 const stars = (n: number) => '★'.repeat(n) + '☆'.repeat(5 - n);
+const googleRatingRounded = siteConfig.social.googleRating ? Math.round(Number(siteConfig.social.googleRating)) : 0;
 
 const localeMap = { fr: 'fr-FR', en: 'en-US', ar: 'ar-MA' } as const;
 
@@ -74,6 +75,30 @@ const path = localizedPath('/avis', lang);
     <p class="text-lg" style="color: var(--color-accent)">
       {stars(Math.round(Number(avg)))} <span style="color: var(--color-text-muted)">{avg}/5 · {aggregateRating.reviewCount} {t(copy.avisSuffix, lang)}</span>
     </p>
+    <!-- Google was entirely missing from this page before — everything
+         here was Tripadvisor-only, even though Google Business Profile is
+         where most local searchers actually check ratings first and where
+         review velocity matters most for local SEO (see the standing note
+         in site.config.ts). The star rating shown is the real, confirmed
+         Google figure — no review count, since that number was never
+         verified with the client and this site doesn't fabricate figures. -->
+    {siteConfig.social.googleReviewsUrl && (
+      <a
+        href={siteConfig.social.googleReviewsUrl}
+        target="_blank"
+        rel="noreferrer"
+        class="mt-2 flex items-center gap-1.5 text-sm font-bold hover:underline"
+        style="color: var(--color-text-muted)"
+      >
+        {siteConfig.social.googleRating && (
+          <>
+            <span style="color: var(--color-accent)">{stars(googleRatingRounded)}</span>
+            {siteConfig.social.googleRating}/5 {t(common.surGoogle, lang)} ·
+          </>
+        )}
+        {t(common.laisserAvisGoogle, lang)} {arrow(lang)}
+      </a>
+    )}
   </section>
 
   <!-- The single best review, set as an unboxed pull-quote — a deliberate

@@ -34,6 +34,10 @@ export const common = {
   horaires: { fr: 'Horaires', en: 'Opening hours', ar: 'ساعات العمل' } satisfies LocalizedText,
 
   avisTripadvisorSuffix: { fr: 'avis Tripadvisor', en: 'Tripadvisor reviews', ar: 'تقييم على Tripadvisor' } satisfies LocalizedText,
+  avisGoogle: { fr: 'Avis Google', en: 'Google reviews', ar: 'تقييمات Google' } satisfies LocalizedText,
+  laisserAvisGoogle: { fr: 'Laisser un avis sur Google', en: 'Leave a review on Google', ar: 'اترك تقييمًا على Google' } satisfies LocalizedText,
+  voirSurGoogle: { fr: 'Voir sur Google', en: 'View on Google', ar: 'شاهد على Google' } satisfies LocalizedText,
+  surGoogle: { fr: 'sur Google', en: 'on Google', ar: 'على Google' } satisfies LocalizedText,
   noteMoyenneClients: { fr: 'note moyenne de nos clients', en: 'average customer rating', ar: 'متوسط تقييم عملائنا' } satisfies LocalizedText,
   ansExperience: { fr: "ans d'expérience en cuisine indienne", en: 'years of experience in Indian cuisine', ar: 'سنوات خبرة في المطبخ الهندي' } satisfies LocalizedText,
   platsPreparesCommande: { fr: 'plats préparés à la commande', en: 'dishes cooked to order', ar: 'أطباق تُحضّر عند الطلب' } satisfies LocalizedText,
