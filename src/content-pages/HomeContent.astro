@@ -148,7 +148,7 @@ const path = localizedPath('/', lang);
 >
   <!-- Hero -->
   <section class="relative min-h-[640px] sm:h-[92vh] flex items-end sm:items-center overflow-hidden">
-    <img src="/images/hero-home.webp" alt={t(copy.metaDescription, lang)} class="absolute inset-0 w-full h-full object-cover" />
+              <img src="/images/hero-home.webp" alt={t(copy.metaDescription, lang)} class="absolute inset-0 w-full h-full object-cover" fetchpriority="high" decoding="async" />
     <div class="absolute inset-0" style="background: linear-gradient(0deg, var(--color-background) 15%, rgba(11,11,12,0.35) 55%, rgba(11,11,12,0.55) 100%)"></div>
 
     <div class="relative z-10 max-w-7xl mx-auto px-5 sm:px-8 pb-16 sm:pb-0 w-full">
